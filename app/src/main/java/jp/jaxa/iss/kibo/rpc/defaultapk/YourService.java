@@ -4,15 +4,22 @@ import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+
+import android.graphics.Bitmap;
+import android.graphics.BotmapFactory;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 
-import org.opencv.core.Mat;
+import org.opencv.aruco.Aruco;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.aruco.dictionary;
+import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
+import org.opencv.android.Utils;
+import org.opencv.imgproc.Imgproc;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them in Astrobee
@@ -83,12 +90,14 @@ public class YourService extends KiboRpcService {
         Mat undisortImg = new Mat();
         Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
 
+        //ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
 
-
-
-        // When you recognize items, let’s set the type and number.
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
         api.setAreaInfo(1, "item_name", 1);
+
+        
 
         /* **************************************************** */
         /* Let's move to the each area and recognize the items. */
@@ -96,9 +105,9 @@ public class YourService extends KiboRpcService {
 
         //point2に移動して画像認識するコード
 
-        //point3に移動する画像認識するコード
+        //point3に移動して画像認識するコード
 
-        //point4に移動する画像認識するコード
+        //point4に移動して画像認識するコード
 
         //宇宙飛行士の前に移動するコード
 
