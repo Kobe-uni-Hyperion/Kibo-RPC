@@ -1,5 +1,6 @@
 package jp.jaxa.iss.kibo.rpc.defaultapk;
 
+import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.graphics.Bitmap;
-import android.graphics.BotmapFactory;
+import android.graphics.BitmapFactory;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
@@ -31,7 +32,7 @@ public class YourService extends KiboRpcService {
 
     @Override
     protected void runPlan1(){
-        Log.i(TAG. msg:"Start mission!!!");
+        //Log.i(TAG,"Start mission!!!");
 
         // The mission starts.
         api.startMission();
@@ -42,13 +43,14 @@ public class YourService extends KiboRpcService {
 
         Point point1 = new Point(10.95, -10.58, 5.195);
         Quaternion quaternion1 = new Quaternion(0f, 0f, -0.707f, 0.707f);
-        Result result1 = api.moveTo(point1, quaternion1, false);
+        Result result1 = api.moveTo(point1, quaternion1, true);
+
 
         final int LOOP_MAX = 5;
 
         //結果をチェックし、moveToapiが成功しない間はループする。(外乱に強いプログラム)
         int loopCounter = 0;
-        while(!result1.hasSucceeded() && LoopCounter < LOOP_MAX){
+        while(!result1.hasSucceeded() && loopCounter < LOOP_MAX){
             //retry
             result1 = api.moveTo(point1,quaternion1,true);
             ++loopCounter;
@@ -57,17 +59,9 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ 
         Mat image = api.getMatNavCam();
         
-        if(image == null){
+        //imageがnullの場合の対処を書く
 
-            //error hundring
-
-        }else{
-
-            String imageStr = yourMethod(image);
-
-        }
-
-        api.saveMatImage(image, imageName:"file_name.png")
+        api.saveMatImage(image,"file_name.png");
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード*/
@@ -76,21 +70,26 @@ public class YourService extends KiboRpcService {
         // ARタグを検知する
         Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         List<Mat> corners = new ArrayList<>();
-        Mat  markerIds = new Mat()
+        Mat  markerIds = new Mat();
         Aruco.detectMarkers(image, dictionary, corners, markerIds);
 
         //カメラ行列の取得
-        Mat cameraMatrix = new mat(rows: 3, cols: 3, CvType.CV_64F);
-        cameraMatrix.put(row: 0, col: 0, api.getNavCamIntrinsics()[0]);
+        Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
+        cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
         //歪み係数の取得
-        Mat cameraCoefficients = new Mat(rows: 1, cols: 5, CvType.CV_64F);
+        Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
 
         //歪みのないimage
         Mat undisortImg = new Mat();
-        Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
+        Calib3d.undistort(image, undisortImg, cameraMatrix, cameraCoefficients);
 
-        //ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+        //ARタグからカメラまでの距離と傾きを求めて、
+        //撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+
+        //画像認識
 
 
         // AreaとItemの紐付け
