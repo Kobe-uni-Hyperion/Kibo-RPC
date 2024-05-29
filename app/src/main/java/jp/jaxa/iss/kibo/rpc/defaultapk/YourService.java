@@ -33,7 +33,7 @@ public class YourService extends KiboRpcService {
 
     @Override
     protected void runPlan1() {
-        // Log.i(TAG,"Start mission!!!");
+        Log.i(TAG, "Start mission!!!");
 
         // The mission starts.
         api.startMission();
@@ -44,16 +44,16 @@ public class YourService extends KiboRpcService {
 
         // Area1の中心座標
         Point area1CenterPoint = new Point(10.95, -10.58, 5.195);
-        Quaternion quaternion1 = new Quaternion(0f, 0f, -0.707f, 0.707f);
-        Result result1 = api.moveTo(area1CenterPoint, quaternion1, true);
+        Quaternion quaternion1 = new Quaternion(0f, 0f, -0.707f, 0.707f); // 変更可能性あり
+        Result resultMoveToArea1 = api.moveTo(area1CenterPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
 
-        // 結果をチェックし、moveToapiが成功しない間はループする。(外乱に強いプログラム)
+        // 結果をチェックし、moveToApiが成功しない間はループする。(外乱に強いプログラム)
         int loopCounter = 0;
-        while (!result1.hasSucceeded() && loopCounter < LOOP_MAX) {
+        while (!resultMoveToArea1.hasSucceeded() && loopCounter < LOOP_MAX) {
             // retry
-            result1 = api.moveTo(area1CenterPoint, quaternion1, true);
+            resultMoveToArea1 = api.moveTo(area1CenterPoint, quaternion1, true);
             ++loopCounter;
         }
 
