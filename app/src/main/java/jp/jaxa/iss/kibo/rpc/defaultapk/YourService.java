@@ -1,15 +1,11 @@
 package jp.jaxa.iss.kibo.rpc.defaultapk;
 
+import android.util.Log;
 import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.IOException;
-import java.io.InputStream;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
@@ -19,8 +15,6 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
-import org.opencv.android.Utils;
-import org.opencv.imgproc.Imgproc;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them
