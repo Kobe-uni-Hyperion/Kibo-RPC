@@ -37,9 +37,12 @@ public class YourService extends KiboRpcService {
         // 特徴量の多いルートを通りたい
 
         // Area1の中心座標
-        Point area1CenterPoint = new Point(10.95, -10.58, 5.195);
-        Quaternion quaternion1 = new Quaternion(0f, 0f, -0.707f, 0.707f); // 変更可能性あり
-        Result resultMoveToArea1 = api.moveTo(area1CenterPoint, quaternion1, true);
+        // Area1の中心は(10.95,−10.58,5.195)
+        // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
+        Point area1FirstViewPoint = new Point(10.95, -9.3, 5.195);
+        // x軸正方向からy軸負方向に回転(Area1を見る向き)
+        Quaternion quaternion1 = new Quaternion(0.707f, 0f, 0f, -0.707f);
+        Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
 
@@ -47,7 +50,7 @@ public class YourService extends KiboRpcService {
         int loopCounter = 0;
         while (!resultMoveToArea1.hasSucceeded() && loopCounter < LOOP_MAX) {
             // retry
-            resultMoveToArea1 = api.moveTo(area1CenterPoint, quaternion1, true);
+            resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
             ++loopCounter;
         }
 
