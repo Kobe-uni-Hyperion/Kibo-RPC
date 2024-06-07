@@ -43,7 +43,7 @@ public class YourService extends KiboRpcService {
         Point area1FirstViewPoint = new Point(10.95, -9.3, 5.195);
         // z軸負方向を軸として、90度回転
         // 視野: ｘ軸正方向 => y軸負方向
-        Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, Math.PI / 2);
+        Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, (float) (Math.PI * 0.5));
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
