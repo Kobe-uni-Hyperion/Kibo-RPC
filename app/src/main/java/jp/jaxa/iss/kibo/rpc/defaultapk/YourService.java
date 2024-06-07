@@ -33,9 +33,24 @@ public class YourService extends KiboRpcService {
         // The mission starts.
         api.startMission();
 
+        // 最初の座標は(9.815, -9.806, 4.293)
         // Area1への移動(とりあえず(x,y,z_min + x,y,z_max) / 2 , 向きも適当)
         // KIZの中でKOZを避けたい
         // 特徴量の多いルートを通りたい
+
+        // KIZ2からKIZ1へ移動するために一旦経由する点
+        // アストロビーが1辺32cmであることを考慮、5cmの余裕を持たせる.
+        Point kiz2ToKiz1 = new Point(10.5 - 0.16 - 0.05, -9.806, 4.32 + 0.16 + 0.05);
+        // ここでは回転の必要なし
+        Quaternion quaternionKiz2ToKiz1 = QuaternionUtil.rotate(0, 0, 1, 0);
+        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
+
+        int loopCounterKiz2ToKiz1 = 0;
+        while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
+            // retry
+            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
+            ++loopCounterKiz2ToKiz1;
+        }
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
