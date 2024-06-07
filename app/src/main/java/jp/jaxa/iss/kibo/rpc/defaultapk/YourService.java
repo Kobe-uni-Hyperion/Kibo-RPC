@@ -3,6 +3,7 @@ package jp.jaxa.iss.kibo.rpc.defaultapk;
 import android.util.Log;
 import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
+import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,9 @@ public class YourService extends KiboRpcService {
         // Area1の中心は(10.95,−10.58,5.195)
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         Point area1FirstViewPoint = new Point(10.95, -9.3, 5.195);
-        // x軸正方向からy軸負方向に回転(Area1を見る向き)
-        Quaternion quaternion1 = new Quaternion(0.707f, 0f, 0f, -0.707f);
+        // z軸負方向を軸として、90度回転
+        // 視野: ｘ軸正方向 => y軸負方向
+        Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, Math.PI / 2);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
