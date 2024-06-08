@@ -39,8 +39,8 @@ public class YourService extends KiboRpcService {
         // 特徴量の多いルートを通りたい
 
         // KIZ2からKIZ1へ移動するために一旦経由する点
-        // アストロビーが1辺32cmであることを考慮、5cmの余裕を持たせる.
-        Point kiz2ToKiz1 = new Point(10.5 - 0.16 - 0.05, -9.806, 4.32 + 0.16 + 0.05);
+        // y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心
+        Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
         // ここでは回転の必要なし
         Quaternion quaternionKiz2ToKiz1 = QuaternionUtil.rotate(0, 0, 1, 0);
         Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
