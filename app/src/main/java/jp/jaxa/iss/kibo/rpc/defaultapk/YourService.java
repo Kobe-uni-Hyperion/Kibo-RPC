@@ -10,6 +10,7 @@ import java.util.List;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
+import gov.nasa.arc.astrobee.Kinematics;
 
 import org.opencv.aruco.Aruco;
 import org.opencv.core.CvType;
@@ -38,6 +39,13 @@ public class YourService extends KiboRpcService {
         // KIZの中でKOZを避けたい
         // 特徴量の多いルートを通りたい
 
+        Log.i(TAG, "StartLocation!!!!");
+        Kinematics startLocation = api.getRobotKinematics();
+        Point startLocationPoint = startLocation.getPosition();
+        // ↓(10.267100213116851, -9.796862709327995, 4.270871767291918)の結果が出た
+        // つまり、Astrobeeはまず最初に勝手にこの座標に移動する。よって、この座標をスタート地点として考慮する必要がある.
+        Log.i(TAG, "StartLocationIs: " + startLocationPoint.getX() + ", " + startLocationPoint.getY() + ", " + startLocationPoint.getZ());
+
         // KIZ2からKIZ1へ移動するために一旦経由する点
         // y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心
         Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
@@ -51,6 +59,11 @@ public class YourService extends KiboRpcService {
             resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
             ++loopCounterKiz2ToKiz1;
         }
+
+        Log.i(TAG, "GetIntoKIZ1!!!!");
+        Kinematics getIntoKIZ1Location = api.getRobotKinematics();
+        Point getIntoKIZ1LocationPoint = getIntoKIZ1Location.getPosition();
+        Log.i(TAG, "GetIntoKIZ1LocationIs: " + getIntoKIZ1LocationPoint.getX() + ", " + getIntoKIZ1LocationPoint.getY() + ", " + getIntoKIZ1LocationPoint.getZ());
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
