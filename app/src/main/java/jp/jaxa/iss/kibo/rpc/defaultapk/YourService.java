@@ -73,14 +73,12 @@ public class YourService extends KiboRpcService {
         }
 
         Log.i(TAG, "GetIntoKIZ1!!!!");
-        Kinematics getIntoKIZ1Location = api.getRobotKinematics();
-        Point getIntoKIZ1LocationPoint = getIntoKIZ1Location.getPosition();
-        Log.i(TAG, "GetIntoKIZ1LocationIs: " + getIntoKIZ1LocationPoint.getX() + ", " + getIntoKIZ1LocationPoint.getY() + ", " + getIntoKIZ1LocationPoint.getZ());
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
-        Point area1FirstViewPoint = new Point(10.95, -9.3, 5.195);
+        // y座標はそのまま、x座標とz座標はArea1の中心から法線ベクトル上にある点
+        Point area1FirstViewPoint = new Point(10.95, -9.806, 5.195);
         // z軸負方向を軸として、90度回転
         // 視野: ｘ軸正方向 => y軸負方向
         Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, (float) (Math.PI * 0.5));
@@ -95,6 +93,8 @@ public class YourService extends KiboRpcService {
             resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
             ++loopCounter;
         }
+
+        Log.i(TAG, "InFrontOfArea1!!!!");
 
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
