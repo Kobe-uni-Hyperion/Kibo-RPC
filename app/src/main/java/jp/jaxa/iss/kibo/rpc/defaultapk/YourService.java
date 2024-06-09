@@ -46,8 +46,20 @@ public class YourService extends KiboRpcService {
         // つまり、Astrobeeはまず最初に勝手にこの座標に移動する。よって、この座標をスタート地点として考慮する必要がある.
         Log.i(TAG, "StartLocationIs: " + startLocationPoint.getX() + ", " + startLocationPoint.getY() + ", " + startLocationPoint.getZ());
 
-        // KIZ2からKIZ1へ移動するために一旦経由する点
-        // y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心
+        // KIZ2からKIZ1へ移動するために、まずZ軸正方向に移動し、その後、X軸正方向に移動する
+        Point kiz2ToKiz1FirstMove = new Point(10.26, -9.806, 4.56);
+        // ここでは回転の必要なし
+        Quaternion quaternionKiz2ToKiz1FirstMove = QuaternionUtil.rotate(0, 0, 1, 0);
+        Result resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternionKiz2ToKiz1FirstMove, true);
+
+        int loopCounterKiz2ToKiz1FirstMove = 0;
+        while (!resultMoveToKiz1FirstMove.hasSucceeded() && loopCounterKiz2ToKiz1FirstMove < 5) {
+            // retry
+            resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternionKiz2ToKiz1FirstMove, true);
+            ++loopCounterKiz2ToKiz1FirstMove;
+        }
+
+        // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
         Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
         // ここでは回転の必要なし
         Quaternion quaternionKiz2ToKiz1 = QuaternionUtil.rotate(0, 0, 1, 0);
