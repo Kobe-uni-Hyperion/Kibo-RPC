@@ -5,31 +5,42 @@ import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 import gov.nasa.arc.astrobee.Kinematics;
-
 import org.opencv.aruco.Aruco;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
-
 /**
  * Class meant to handle commands from the Ground Data System and execute them
  * in Astrobee
  */
 
-public class YourService extends KiboRpcService {
+public class YourService extends KiboRpcService implements Detector.DetectorListener {
 
     private final String TAG = this.getClass().getSimpleName();
+    private Detector detector;
+    private static final String MODEL_PATH = "version2_float32.tflite";
+    private static final String LABELS_PATH = "labels.txt";
 
     @Override
     protected void runPlan1() {
         Log.i(TAG, "Start mission!!!");
+
+        detector = new Detector(getBaseContext(), MODEL_PATH, LABELS_PATH, this);
+        try {
+            detector.setup();
+        } catch (IOException e) {
+            Log.e(TAG, "Detector setup failed.", e);
+            return;
+        }
+
 
         // The mission starts.
         api.startMission();
@@ -172,6 +183,20 @@ public class YourService extends KiboRpcService {
         // Take a snapshot of the target item.→ミッション終了
         api.takeTargetItemSnapshot();
 
+    }
+
+    @Override
+    public void onEmptyDetect() {
+        // Implement the required method here
+        Log.i(TAG, "onEmptyDetect: No objects detected.");
+    }
+
+    @Override
+    public void onDetect(List<BoundingBox> boundingBoxes) {
+        // Implement the required method here
+        for (BoundingBox box : boundingBoxes) {
+            Log.i(TAG, "Detected object at: " + box.toString());
+        }
     }
 
     @Override
