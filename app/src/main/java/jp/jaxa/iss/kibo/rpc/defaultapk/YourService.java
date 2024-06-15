@@ -135,8 +135,8 @@ public class YourService extends KiboRpcService {
             cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
 
             // 歪みのないimage
-            Mat undistortImg = new Mat();
-            Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
+            Mat unDistortedImg = new Mat();
+            Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
 
             // ポーズ推定
             List<Mat> singleCorner = new ArrayList<>();
@@ -147,10 +147,14 @@ public class YourService extends KiboRpcService {
             int markerId = (int) markerIds.get(0, 0)[0];
             Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
 
+            api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
+
+
 
         } else{
             Log.i(TAG, "No AR markers detected");
         }
+
 
         // ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
