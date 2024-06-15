@@ -18,6 +18,13 @@ import org.opencv.core.Mat;
 import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import jp.jaxa.iss.kibo.rpc.defaultapk.BoundingBox;
+import jp.jaxa.iss.kibo.rpc.defaultapk.Detector;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Class meant to handle commands from the Ground Data System and execute them
  * in Astrobee
@@ -26,6 +33,7 @@ import org.opencv.calib3d.Calib3d;
 public class YourService extends KiboRpcService {
 
     private final String TAG = this.getClass().getSimpleName();
+    private Detector detector;
 
     @Override
     protected void runPlan1() {
@@ -33,6 +41,31 @@ public class YourService extends KiboRpcService {
 
         // The mission starts.
         api.startMission();
+
+        // Detectorのセットアップ
+        try {
+            detector = new Detector(getApplicationContext(), "model.tflite", "labels.txt");
+            detector.setup();
+        } catch (IOException e) {
+            Log.e(TAG, "Detector setup failed", e);
+            return;
+        }
+
+        // アセットから画像を読み込む
+        Bitmap asset_image = loadImageFromAssets("5.png");
+        if (asset_image != null) {
+            List<BoundingBox> boundingBoxes = detector.detect(asset_image);
+            if (boundingBoxes != null) {
+                //画像検出の結果を表示
+                processDetectionResult(boundingBoxes);
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
+        } else {
+            Log.e(TAG, "Failed to load image from assets");
+        }
+
+
 
         // 最初の座標は(9.815, -9.806, 4.293)
         // Area1への移動(とりあえず(x,y,z_min + x,y,z_max) / 2 , 向きも適当)
@@ -187,5 +220,22 @@ public class YourService extends KiboRpcService {
     // You can add your method.
     private String yourMethod() {
         return "your method";
+    }
+
+    //アセットから画像を読み込む
+    private Bitmap loadImageFromAssets(String fileName) {
+        try (InputStream inputStream = getApplicationContext().getAssets().open(fileName)) {
+            return BitmapFactory.decodeStream(inputStream);
+        } catch (IOException e) {
+            Log.e(TAG, "Error loading image from assets: " + fileName, e);
+            return null;
+        }
+    }
+
+    //バウンディングボックスから情報を表示する
+    private void processDetectionResult(List<BoundingBox> boundingBoxes) {
+        for (BoundingBox box : boundingBoxes) {
+            Log.i(TAG, "Detected object: " + box.getClsName() + " with confidence " + box.getCnf());
+        }
     }
 }
