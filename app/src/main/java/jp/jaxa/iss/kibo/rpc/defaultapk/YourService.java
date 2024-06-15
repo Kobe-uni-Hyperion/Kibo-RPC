@@ -173,7 +173,8 @@ public class YourService extends KiboRpcService {
         double minDistanceToArea2 = Double.MAX_VALUE;
         double[] bestPointToGoThroughKOZ1 = new double[3];
 
-        // 0.05刻みでpointInFrontOfKOZ1を探索する
+        // 0.05刻みでpointInFrontOfKOZ1を探索する　
+        // 多分これUtil化したほうがいい
         for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
             for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
                 // KOZを避けているか確認
@@ -182,7 +183,8 @@ public class YourService extends KiboRpcService {
                 }
 
                 double[] point1InFrontOfKOZ1 = {x, -9.7, z};
-                double[] point2InFrontOfKOZ1 = {x, -9.25, z};
+                // 本当は-9.1じゃなくて-9.25にしたいけど、うまくいかないので一旦これで
+                double[] point2InFrontOfKOZ1 = {x, -9.1, z};
                 double[] pointInFrontOfArea2 = {10.925, -8.875, 4.26203};
 
                 // 距離の計算
@@ -217,7 +219,7 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1を通過する
          */
-        Point point2ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.25, bestPointToGoThroughKOZ1[2]);
+        Point point2ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.1, bestPointToGoThroughKOZ1[2]);
         // z軸負方向を軸として、-90度回転
         Quaternion quaternion2WhenKOZ1 = QuaternionUtil.rotate(0, 0, -1, (float) ((-0.5) * Math.PI));
         Result result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion2WhenKOZ1, true);
