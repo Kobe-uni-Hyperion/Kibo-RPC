@@ -18,6 +18,9 @@ import org.opencv.core.Mat;
 import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
 
+import org.opencv.core.Core;
+import org.opencv.core.Scalar;
+
 /**
  * Class meant to handle commands from the Ground Data System and execute them
  * in Astrobee
@@ -99,7 +102,11 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
-        // imageがnullの場合の対処を書く
+        // imageがnullの場合の処理
+        if (image.empty()) {
+            Log.e(TAG, "Failed to capture image form NavCam.");
+            return;
+        }
 
         api.saveMatImage(image, "file_name.png");
 
@@ -113,22 +120,47 @@ public class YourService extends KiboRpcService {
         Mat markerIds = new Mat();
         Aruco.detectMarkers(image, dictionary, corners, markerIds);
 
-        // カメラ行列の取得
-        Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
-        cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
-        // 歪み係数の取得
-        Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
-        cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
-        cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
+        // 出力の回転ベクトルと並進ベクトル
+        Mat rvec = new Mat();
+        Mat tvec = new Mat();
 
-        // 歪みのないimage
-        Mat undisortImg = new Mat();
-        Calib3d.undistort(image, undisortImg, cameraMatrix, cameraCoefficients);
+        if (!markerIds.empty()) {
+            Log.i(TAG, "ARtag!!!");
+            // カメラ行列の取得
+            Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
+            cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
+            // 歪み係数の取得
+            Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
+            cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
+            cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
 
-        // ARタグからカメラまでの距離と傾きを求めて、
-        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+            // 歪みのないimage
+            Mat undistortImg = new Mat();
+            Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
 
-        // 画像認識
+            // ポーズ推定
+            List<Mat> singleCorner = new ArrayList<>();
+            singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用
+            Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
+
+            // ARタグの位置と向きをログ出力
+            int markerId = (int) markerIds.get(0, 0)[0];
+            Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
+
+
+        } else{
+            Log.i(TAG, "No AR markers detected");
+        }
+
+        // ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+
+        // 切り抜いた画像を画像認識
+
+
+
+
+
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
