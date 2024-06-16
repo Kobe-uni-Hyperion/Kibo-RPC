@@ -182,9 +182,13 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
+                // KOZ1を通過する直前の点
+                // -9.7は、-9.5から0.2下がった値(20cm余分に取っている)
                 double[] point1InFrontOfKOZ1 = {x, -9.7, z};
-                // 本当は-9.1じゃなくて-9.25にしたいけど、うまくいかないので一旦これで
-                double[] point2InFrontOfKOZ1 = {x, -9.1, z};
+
+                // KOZ1を通過した直後の点
+                // -9.25は、-9.45から0.2上がった値(20cm余分に取っている)
+                double[] point2InFrontOfKOZ1 = {x, -9.25, z};
                 double[] pointInFrontOfArea2 = {10.925, -8.875, 4.26203};
 
                 // 距離の計算
