@@ -153,9 +153,16 @@ public class YourService extends KiboRpcService {
             singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用
             Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
 
+            // ARタグのコーナー4点の座標をログ出力
+            Mat corner = corners.get(0);  // 最初のマーカーのコーナー
+            for (int i = 0; i < 4; i++) {
+                double[] point = corner.get(0, i);
+                Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
+            }
+
             // 回転ベクトルから回転行列に変換
-            Mat rotationMatrix = new Mat();
-            Calib3d.Rodrigues(rvec, rotationMatrix);
+            //Mat rotationMatrix = new Mat();
+            //Calib3d.Rodrigues(rvec, rotationMatrix);
 
 
             // ARタグの位置と向きをログ出力
@@ -163,9 +170,11 @@ public class YourService extends KiboRpcService {
             Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
 
             // 方向が可視化された画像を保存するコードの追加
-            float axisLength = 0.1f; // 軸の長さを指定
-            Aruco.drawAxis(unDistortedImg, cameraMatrix, cameraCoefficients, rvec, tvec, axisLength);
-            api.saveMatImage(unDistortedImg, "unDistortedImgWithAxis.png");
+            //float axisLength = 0.1f; // 軸の長さを指定
+            //Aruco.drawAxis(unDistortedImg, cameraMatrix, cameraCoefficients, rvec, tvec, axisLength);
+            //api.saveMatImage(unDistortedImg, "unDistortedImgWithAxis.png");
+
+
 
 
 
