@@ -21,6 +21,10 @@ import org.opencv.calib3d.Calib3d;
 import org.opencv.core.Core;
 import org.opencv.core.Scalar;
 
+import org.opencv.aruco.DetectorParameters;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.core.*;
+
 /**
  * Class meant to handle commands from the Ground Data System and execute them
  * in Astrobee
@@ -129,12 +133,16 @@ public class YourService extends KiboRpcService {
             // カメラ行列の取得
             Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
             cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
+            // Log.i(TAG,"cameraMatrix is" + cameraMatrix);
+
             // 歪み係数の取得
             Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
             cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
-            cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
+            // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
 
-            // 歪みのないimage
+
+            // 歪みのないimageに変換
+            cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
             Mat unDistortedImg = new Mat();
             Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
 
@@ -149,6 +157,17 @@ public class YourService extends KiboRpcService {
 
             api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
+            // Lost Item 表示エリアを切り抜く処理
+            int x = 20; // エリアの左上のx座標（単位:ピクセル）
+            int y = 15; // エリアの左上のy座標（単位:ピクセル）
+            int width = 200; // エリアの幅（単位:ピクセル）
+            int height = 150; // エリアの高さ（単位:ピクセル）
+            Rect roi = new Rect(x, y, width, height);
+            Mat croppedImage = new Mat(unDistortedImg, roi);
+
+            // 切り抜いた画像を保存
+            api.saveMatImage(croppedImage, "croppedImage.png");
+
 
 
         } else{
@@ -157,6 +176,7 @@ public class YourService extends KiboRpcService {
 
 
         // ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
 
 
         // 切り抜いた画像を画像認識
