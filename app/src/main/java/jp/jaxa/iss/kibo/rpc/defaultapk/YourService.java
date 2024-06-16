@@ -24,6 +24,7 @@ import org.opencv.core.Scalar;
 import org.opencv.aruco.DetectorParameters;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them
@@ -145,23 +146,36 @@ public class YourService extends KiboRpcService {
             cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
             Mat unDistortedImg = new Mat();
             Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
+            api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
             // ポーズ推定
             List<Mat> singleCorner = new ArrayList<>();
             singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用
             Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
 
+            // 回転ベクトルから回転行列に変換
+            Mat rotationMatrix = new Mat();
+            Calib3d.Rodrigues(rvec, rotationMatrix);
+
+
             // ARタグの位置と向きをログ出力
             int markerId = (int) markerIds.get(0, 0)[0];
             Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
 
-            api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
+            // 方向が可視化された画像を保存するコードの追加
+            float axisLength = 0.1f; // 軸の長さを指定
+            Aruco.drawAxis(unDistortedImg, cameraMatrix, cameraCoefficients, rvec, tvec, axisLength);
+            api.saveMatImage(unDistortedImg, "unDistortedImgWithAxis.png");
+
+
+
 
             // Lost Item 表示エリアを切り抜く処理
-            int x = 20; // エリアの左上のx座標（単位:ピクセル）
-            int y = 15; // エリアの左上のy座標（単位:ピクセル）
-            int width = 200; // エリアの幅（単位:ピクセル）
-            int height = 150; // エリアの高さ（単位:ピクセル）
+            // Mat Image = 1280 * 960 px
+            int x = 600; // エリアの左上のx座標（単位:ピクセル）
+            int y = 500; // エリアの左上のy座標（単位:ピクセル）
+            int width = 250; // エリアの幅（単位:ピクセル）
+            int height = 250; // エリアの高さ（単位:ピクセル）
             Rect roi = new Rect(x, y, width, height);
             Mat croppedImage = new Mat(unDistortedImg, roi);
 
