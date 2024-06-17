@@ -18,13 +18,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 public final class Detector {
+
+    static {
+        System.loadLibrary("tensorflowlite_jni");
+    }
+
     private Interpreter interpreter;  // TensorFlow Liteのインタプリタ
     private int tensorWidth;          // 入力テンソルの幅
     private int tensorHeight;         // 入力テンソルの高さ
@@ -41,7 +45,7 @@ public final class Detector {
     private static final float INPUT_STANDARD_DEVIATION = 255.0F;
     private static final DataType INPUT_IMAGE_TYPE = DataType.FLOAT32;
     private static final DataType OUTPUT_IMAGE_TYPE = DataType.FLOAT32;
-    private static final float CONFIDENCE_THRESHOLD = 0.5F;
+    private static final float CONFIDENCE_THRESHOLD = 0.01F;
     private static final float IOU_THRESHOLD = 0.4F;
 
     // コンストラクタ
@@ -59,7 +63,13 @@ public final class Detector {
     // モデルとラベルの読み込みおよびセットアップ
     public void setup() throws IOException {
         // モデルファイルの読み込み
-        MappedByteBuffer model = FileUtil.loadMappedFile(context, modelPath);
+        InputStream inputStream = context.getAssets().open(modelPath);
+        ByteBuffer model = ByteBuffer.allocateDirect(inputStream.available());
+        byte[] buffer = new byte[inputStream.available()];
+        inputStream.read(buffer);
+        model.put(buffer);
+        model.rewind();
+
         Interpreter.Options options = new Interpreter.Options();
         options.setNumThreads(4); // スレッド数の設定
         interpreter = new Interpreter(model, options);
@@ -74,8 +84,8 @@ public final class Detector {
         numElements = outputShape[2];
 
         // ラベルファイルの読み込み
-        try (InputStream inputStream = context.getAssets().open(labelPath);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (InputStream labelInputStream = context.getAssets().open(labelPath);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(labelInputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 labels.add(line);
