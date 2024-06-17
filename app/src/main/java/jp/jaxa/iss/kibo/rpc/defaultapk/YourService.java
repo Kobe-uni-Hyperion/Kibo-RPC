@@ -153,17 +153,60 @@ public class YourService extends KiboRpcService {
             singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用
             Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
 
-            // ARタグのコーナー4点の座標をログ出力
-            Mat corner = corners.get(0);  // 最初のマーカーのコーナー
-            for (int i = 0; i < 4; i++) {
-                double[] point = corner.get(0, i);
-                Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
-            }
+            // ARタグのコーナー4点の座標を変数として保存し、log出力
+            Mat corner = corners.get(0);  // 最初のマーカー(今回はARマーカーは1枚なので0のみ)のコーナー
+            //for (int i = 0; i < 4; i++) {
+            //    double[] point = corner.get(0, i);
+            //    Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
+            //}
+            // 4点の座標を保持する変数を宣言
+            double[] point1 = corner.get(0, 0);
+            double[] point2 = corner.get(0, 1);
+            double[] point3 = corner.get(0, 2);
+            double[] point4 = corner.get(0, 3);
+
+            // ログ出力
+            Log.i(TAG, "Corner 1: (" + point1[0] + ", " + point1[1] + ")");
+            Log.i(TAG, "Corner 2: (" + point2[0] + ", " + point2[1] + ")");
+            Log.i(TAG, "Corner 3: (" + point3[0] + ", " + point3[1] + ")");
+            Log.i(TAG, "Corner 4: (" + point4[0] + ", " + point4[1] + ")");
+
+/* 
+            // 出力画像のサイズと4点の座標を指定
+            int outputWidth = 300; // 切り抜く領域の幅
+            int outputHeight = 300; // 切り抜く領域の高さ
+
+            // MatOfPoint2fに変換 
+            MatOfPoint2f srcPoints = new MatOfPoint2f();
+            srcPoints.fromArray(
+                    new Point(point1[0], point1[1]),
+                    new Point(point2[0], point2[1]),
+                    new Point(point3[0], point3[1]),
+                    new Point(point4[0], point4[1])
+            );
+            MatOfPoint2f dstPoints = new MatOfPoint2f();
+            dstPoints.fromArray(
+                    new Point(0, 0),
+                    new Point(outputWidth, 0),
+                    new Point(outputWidth, outputHeight),
+                    new Point(0, outputHeight)
+            );
+
+            // 変換行列を計算
+            Mat transformationMatrix = Calib3d.findHomography(srcPoints, dstPoints);
+
+            // 射影変換を実行
+            Mat outputImage = new Mat();
+            Imgproc.warpPerspective(unDistortedImg, outputImage, transformationMatrix, new Size(outputWidth, outputHeight));
+
+            // 切り抜いた画像を保存
+            api.saveMatImage(outputImage, "cropped_image.jpg");*/
+
+
 
             // 回転ベクトルから回転行列に変換
             //Mat rotationMatrix = new Mat();
             //Calib3d.Rodrigues(rvec, rotationMatrix);
-
 
             // ARタグの位置と向きをログ出力
             int markerId = (int) markerIds.get(0, 0)[0];
@@ -174,38 +217,9 @@ public class YourService extends KiboRpcService {
             //Aruco.drawAxis(unDistortedImg, cameraMatrix, cameraCoefficients, rvec, tvec, axisLength);
             //api.saveMatImage(unDistortedImg, "unDistortedImgWithAxis.png");
 
-
-
-
-
-
-            // Lost Item 表示エリアを切り抜く処理
-            // Mat Image = 1280 * 960 px
-            int x = 600; // エリアの左上のx座標（単位:ピクセル）
-            int y = 500; // エリアの左上のy座標（単位:ピクセル）
-            int width = 250; // エリアの幅（単位:ピクセル）
-            int height = 250; // エリアの高さ（単位:ピクセル）
-            Rect roi = new Rect(x, y, width, height);
-            Mat croppedImage = new Mat(unDistortedImg, roi);
-
-            // 切り抜いた画像を保存
-            api.saveMatImage(croppedImage, "croppedImage.png");
-
-
-
         } else{
             Log.i(TAG, "No AR markers detected");
         }
-
-
-        // ARタグからカメラまでの距離と傾きを求めて、撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
-
-
-
-        // 切り抜いた画像を画像認識
-
-
-
 
 
 
