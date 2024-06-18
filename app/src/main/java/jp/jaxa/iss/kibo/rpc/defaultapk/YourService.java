@@ -7,6 +7,8 @@ import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
@@ -25,6 +27,7 @@ import org.opencv.aruco.DetectorParameters;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
+
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them
@@ -141,7 +144,6 @@ public class YourService extends KiboRpcService {
             cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
             // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
 
-
             // 歪みのないimageに変換
             cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
             Mat unDistortedImg = new Mat();
@@ -150,16 +152,15 @@ public class YourService extends KiboRpcService {
 
             // ポーズ推定
             List<Mat> singleCorner = new ArrayList<>();
-            singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用
+            singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用(ARマーカーは１枚だから)
             Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
 
-            // ARタグのコーナー4点の座標を変数として保存し、log出力
-            Mat corner = corners.get(0);  // 最初のマーカー(今回はARマーカーは1枚なので0のみ)のコーナー
-            //for (int i = 0; i < 4; i++) {
-            //    double[] point = corner.get(0, i);
-            //    Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
-            //}
-            // 4点の座標を保持する変数を宣言
+
+            // singleCorner 行列のログ出力
+            Log.i(TAG, "singleCorner: " + singleCorner.get(0).dump());
+            // singleCorner: [804, 653, 792, 683, 766, 676, 779, 644]
+
+            // 4点の座標を保持する変数を初期化
             double[] point1 = corner.get(0, 0);
             double[] point2 = corner.get(0, 1);
             double[] point3 = corner.get(0, 2);
@@ -170,43 +171,10 @@ public class YourService extends KiboRpcService {
             Log.i(TAG, "Corner 2: (" + point2[0] + ", " + point2[1] + ")");
             Log.i(TAG, "Corner 3: (" + point3[0] + ", " + point3[1] + ")");
             Log.i(TAG, "Corner 4: (" + point4[0] + ", " + point4[1] + ")");
-
-/* 
-            // 出力画像のサイズと4点の座標を指定
-            int outputWidth = 300; // 切り抜く領域の幅
-            int outputHeight = 300; // 切り抜く領域の高さ
-
-            // MatOfPoint2fに変換 
-            MatOfPoint2f srcPoints = new MatOfPoint2f();
-            srcPoints.fromArray(
-                    new Point(point1[0], point1[1]),
-                    new Point(point2[0], point2[1]),
-                    new Point(point3[0], point3[1]),
-                    new Point(point4[0], point4[1])
-            );
-            MatOfPoint2f dstPoints = new MatOfPoint2f();
-            dstPoints.fromArray(
-                    new Point(0, 0),
-                    new Point(outputWidth, 0),
-                    new Point(outputWidth, outputHeight),
-                    new Point(0, outputHeight)
-            );
-
-            // 変換行列を計算
-            Mat transformationMatrix = Calib3d.findHomography(srcPoints, dstPoints);
-
-            // 射影変換を実行
-            Mat outputImage = new Mat();
-            Imgproc.warpPerspective(unDistortedImg, outputImage, transformationMatrix, new Size(outputWidth, outputHeight));
-
-            // 切り抜いた画像を保存
-            api.saveMatImage(outputImage, "cropped_image.jpg");*/
-
-
-
-            // 回転ベクトルから回転行列に変換
-            //Mat rotationMatrix = new Mat();
-            //Calib3d.Rodrigues(rvec, rotationMatrix);
+            //Corner 1: (757.0, 635.0)
+            //Corner 2: (774.0, 652.0)
+            //Corner 3: (755.0, 676.0)
+            //Corner 4: (738.0, 661.0)
 
             // ARタグの位置と向きをログ出力
             int markerId = (int) markerIds.get(0, 0)[0];
