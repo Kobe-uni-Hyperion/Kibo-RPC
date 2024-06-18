@@ -133,14 +133,19 @@ public class YourService extends KiboRpcService {
         Mat markerIds = new Mat();
         Aruco.detectMarkers(image, dictionary, corners, markerIds);
 
-        Mat corner = corners.get(0);
+        Mat corner = corners.get(0); // 最初のマーカーのコーナー
         // corner座標出力
         Log.i(TAG, "corners are " + corner);
+        for (int i = 0; i < 4; i++) {
+            double[] point = corner.get(0, i);
+            Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
+        }
 
         final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
 
         for (int i = 0; i < 4; i++) {
-            points[i] = new org.opencv.core.Point(corner.get(i, 0));
+            // rawとcolomn入れ替え
+            points[i] = new org.opencv.core.Point(corner.get(0, i));
             Log.i(TAG, "corners are (points) " + points[i]);
         }
 
