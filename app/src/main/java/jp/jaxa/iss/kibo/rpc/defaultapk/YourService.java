@@ -207,7 +207,7 @@ public class YourService extends KiboRpcService {
          * KOZ1の前まで行く
          */
         // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ1 = new Point(11.21, -9.7, 5.27);
+        Point point1ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.7, bestPointToGoThroughKOZ1[2]);
         Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1, true);
 
         int loopCounter1KOZ1 = 0;
@@ -222,7 +222,7 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1を通過する
          */
-        Point point2ToGoThroughKOZ1 = new Point(11.21, -8.875, 5.27);
+        Point point2ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.25, bestPointToGoThroughKOZ1[2]);
         Result result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion1, true);
 
         int loopCounter2KOZ1 = 0;
@@ -237,7 +237,7 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.26203);
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.47);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
