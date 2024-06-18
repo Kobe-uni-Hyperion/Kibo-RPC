@@ -101,8 +101,9 @@ public class YourService extends KiboRpcService {
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
-        // y座標はそのまま、x座標とz座標はArea1の中心から法線ベクトル上にある点
-        Point area1FirstViewPoint = new Point(10.95, -9.806, 5.195);
+        // x座標とz座標はArea1の中心から法線ベクトル上にある点
+        // y座標をArea1に近づける
+        Point area1FirstViewPoint = new Point(10.95, -9.9, 5.195);
         // z軸負方向を軸として、90度回転
         // 視野: ｘ軸正方向 => y軸負方向
         Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, (float) (Math.PI * 0.5));
