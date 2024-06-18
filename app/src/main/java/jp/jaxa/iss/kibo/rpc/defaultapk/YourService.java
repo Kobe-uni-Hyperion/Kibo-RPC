@@ -1,33 +1,17 @@
 package jp.jaxa.iss.kibo.rpc.defaultapk;
 
 import android.util.Log;
-import gov.nasa.arc.astrobee.Result;
-import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
-import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
-import java.util.Comparator;
-
-import gov.nasa.arc.astrobee.types.Point;
-import gov.nasa.arc.astrobee.types.Quaternion;
-import gov.nasa.arc.astrobee.Kinematics;
-
-import org.opencv.aruco.Aruco;
+import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.aruco.Dictionary;
-import org.opencv.calib3d.Calib3d;
 
-import org.opencv.core.Core;
-import org.opencv.core.Scalar;
-
-import org.opencv.aruco.DetectorParameters;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-
+import gov.nasa.arc.astrobee.Kinematics;
+import gov.nasa.arc.astrobee.Result;
+import gov.nasa.arc.astrobee.types.Point;
+import gov.nasa.arc.astrobee.types.Quaternion;
+import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
+import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them
@@ -123,71 +107,48 @@ public class YourService extends KiboRpcService {
         /* *********************************************************************** */
 
         // ARタグを検知する
-        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
-        List<Mat> corners = new ArrayList<>();
-        Mat markerIds = new Mat();
-        Aruco.detectMarkers(image, dictionary, corners, markerIds);
-
-        // 出力の回転ベクトルと並進ベクトル
-        Mat rvec = new Mat();
-        Mat tvec = new Mat();
-
-        if (!markerIds.empty()) {
-            Log.i(TAG, "ARtag!!!");
-            // カメラ行列の取得
-            Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
-            cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
-            // Log.i(TAG,"cameraMatrix is" + cameraMatrix);
-
-            // 歪み係数の取得
-            Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
-            cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
-            // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
-
-            // 歪みのないimageに変換
-            cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
-            Mat unDistortedImg = new Mat();
-            Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
-            api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
-
-            // ポーズ推定
-            List<Mat> singleCorner = new ArrayList<>();
-            singleCorner.add(corners.get(0));  // 最初のマーカーのコーナーのみ使用(ARマーカーは１枚だから)
-            Aruco.estimatePoseSingleMarkers(singleCorner, 0.05f, cameraMatrix, cameraCoefficients, rvec, tvec);
+        //if (!markerIds.empty()) {
+        //Log.i(TAG, "ARtag!!!");
 
 
-            // singleCorner 行列のログ出力
-            Log.i(TAG, "singleCorner: " + singleCorner.get(0).dump());
-            // singleCorner: [804, 653, 792, 683, 766, 676, 779, 644]
+        // カメラ行列の取得
+        Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
+        // Log.i(TAG,"cameraMatrix is" + cameraMatrix);
 
-            // 4点の座標を保持する変数を初期化
-            double[] point1 = corner.get(0, 0);
-            double[] point2 = corner.get(0, 1);
-            double[] point3 = corner.get(0, 2);
-            double[] point4 = corner.get(0, 3);
+        // 歪み係数の取得
+        Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
+        // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
 
-            // ログ出力
-            Log.i(TAG, "Corner 1: (" + point1[0] + ", " + point1[1] + ")");
-            Log.i(TAG, "Corner 2: (" + point2[0] + ", " + point2[1] + ")");
-            Log.i(TAG, "Corner 3: (" + point3[0] + ", " + point3[1] + ")");
-            Log.i(TAG, "Corner 4: (" + point4[0] + ", " + point4[1] + ")");
-            //Corner 1: (757.0, 635.0)
-            //Corner 2: (774.0, 652.0)
-            //Corner 3: (755.0, 676.0)
-            //Corner 4: (738.0, 661.0)
 
-            // ARタグの位置と向きをログ出力
-            int markerId = (int) markerIds.get(0, 0)[0];
-            Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
+        // 歪みのないimageに変換
+        cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
+        Mat unDistortedImg = new Mat();
+        Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
+        api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
-            // 方向が可視化された画像を保存するコードの追加
-            //float axisLength = 0.1f; // 軸の長さを指定
-            //Aruco.drawAxis(unDistortedImg, cameraMatrix, cameraCoefficients, rvec, tvec, axisLength);
-            //api.saveMatImage(unDistortedImg, "unDistortedImgWithAxis.png");
+        Mat firstCorner = corners.get(0);
 
-        } else{
-            Log.i(TAG, "No AR markers detected");
-        }
+        // singleCorner:(4,2)行列
+        // ARタグのコーナー4点の座標を変数として保存し、log出力
+
+        //for (int i = 0; i < 4; i++) {
+        //    double[] point = corner.get(0, i);
+        //    Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
+        //}
+        // singleCorner 行列のログ出力
+        // singleCorner: [804, 653, 792, 683, 766, 676, 779, 644]
+
+
+        // ARタグの位置と向きをログ出力
+        int markerId = (int) markerIds.get(0, 0)[0];
+        Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
+
+
+        // } else{
+        //     Log.i(TAG, "No AR markers detected");
+        // }
 
 
 
