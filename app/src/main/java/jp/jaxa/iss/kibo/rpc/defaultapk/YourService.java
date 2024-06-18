@@ -2,16 +2,22 @@ package jp.jaxa.iss.kibo.rpc.defaultapk;
 
 import android.util.Log;
 
+import org.opencv.aruco.Aruco;
+import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import gov.nasa.arc.astrobee.Kinematics;
 import gov.nasa.arc.astrobee.Result;
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
-import jp.jaxa.iss.kibo.rpc.defaultapk.image.ImageUtil;
 import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 /**
@@ -121,13 +127,94 @@ public class YourService extends KiboRpcService {
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
-        // unDistortedImg切り抜き
-        Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
-        if (clippedImage != null && !clippedImage.empty()) {
-            api.saveMatImage(clippedImage, "clippedImage.png");
-        } else {
-            Log.i(TAG, "clippedImage = null or clippedImage is empty");
+
+        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        ArrayList<Mat> corners = new ArrayList<>();
+        Mat markerIds = new Mat();
+        Aruco.detectMarkers(image, dictionary, corners, markerIds);
+
+        Mat corner = corners.get(0);
+        // corner座標出力
+        Log.i(TAG, "corners are " + corner);
+
+        final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
+
+        for (int i = 0; i < 4; i++) {
+            points[i] = new org.opencv.core.Point(corner.get(i, 0));
+            Log.i(TAG, "corners are (points) " + points[i]);
         }
+
+
+        // y座標が降順になるように座標4点をソート
+        Arrays.sort(points, (p1, p2) -> Double.compare(p2.y, p1.y));
+        org.opencv.core.Point leftTop, rightTop, leftBottom, rightBottom;
+
+        // 四角形の上二つの左右を決定
+        if (points[0].x < points[1].x) {
+            leftTop = points[0];
+            rightTop = points[1];
+        } else {
+            leftTop = points[1];
+            rightTop = points[0];
+        }
+        // 四角形の下二つの左右を決定
+        if (points[2].x < points[3].x) {
+            leftBottom = points[2];
+            rightBottom = points[3];
+        } else {
+            leftBottom = points[3];
+            rightBottom = points[2];
+        }
+        Log.i(TAG, "leftTop, rightTop, leftBottom, rightBottom are " + leftTop + rightTop + leftBottom + rightBottom);
+
+        double width = Math.sqrt(Math.pow(leftTop.x - rightTop.x, 2) + Math.pow(leftTop.y - rightTop.y, 2));
+        double height = Math.sqrt(Math.pow(leftTop.x - leftBottom.x, 2) + Math.pow(leftTop.y - leftBottom.y, 2));
+
+        Log.i(TAG, "width is" + width + "height is" + height);
+
+        Mat transformMatrix;
+        {
+            MatOfPoint2f srcPoints = new MatOfPoint2f(points);
+            srcPoints.convertTo(srcPoints, CvType.CV_32F); // タイプをCV_32Fに変換
+
+            MatOfPoint2f dstPoints = new MatOfPoint2f(
+                    new org.opencv.core.Point(0, 0),
+                    new org.opencv.core.Point(width - 1, 0),
+                    new org.opencv.core.Point(width - 1, height - 1),
+                    new org.opencv.core.Point(0, height - 1)
+            );
+            dstPoints.convertTo(dstPoints, CvType.CV_32F); // タイプをCV_32Fに変換
+
+            // 変換前の座標と変換後の座標から透視変換行列(切り抜きたい領域を長方形に変換するための行列)を作る
+            transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
+            // transformMatrix を CV_32F に変換
+            transformMatrix.convertTo(transformMatrix, CvType.CV_32F);
+        }
+
+        Log.i(TAG, "transformMatrix is" + transformMatrix);
+        // transformMatrix の値をログに出力
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                double value = transformMatrix.get(row, col)[0];
+                Log.i(TAG, "transformMatrix[" + row + "][" + col + "] = " + value);
+            }
+        }
+
+        //Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
+        Mat clippedImage = new Mat((int) width, (int) height, unDistortedImg.type());
+        //Mat clippedImage = new Mat();
+
+        Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
+        api.saveMatImage(clippedImage, "clippedImage.png");
+
+
+        // unDistortedImg切り抜き
+        //Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
+        //if (clippedImage != null && !clippedImage.empty()) {
+        //  api.saveMatImage(clippedImage, "clippedImage.png");
+        //} else {
+        //  Log.i(TAG, "clippedImage = null or clippedImage is empty");
+        //}
 
         // } else{
         //     Log.i(TAG, "No AR markers detected");
