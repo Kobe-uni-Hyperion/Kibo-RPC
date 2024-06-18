@@ -174,7 +174,7 @@ public class YourService extends KiboRpcService {
         double minDistanceToArea2 = Double.MAX_VALUE;
         double[] bestPointToGoThroughKOZ1 = new double[3];
 
-        // 0.05刻みでpointInFrontOfKOZ1を探索する　
+        // 0.01刻みでpointInFrontOfKOZ1を探索する　
         // 多分これUtil化したほうがいい
         for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
             for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
