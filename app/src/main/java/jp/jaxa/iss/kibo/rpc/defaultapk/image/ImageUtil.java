@@ -50,19 +50,23 @@ public class ImageUtil {
             MatOfPoint2f srcPoints = new MatOfPoint2f(points);
             srcPoints.convertTo(srcPoints, CvType.CV_32F); // タイプをCV_32Fに変換
 
-            MatOfPoint2f dstPoint = new MatOfPoint2f(
+            MatOfPoint2f dstPoints = new MatOfPoint2f(
                     new Point(0, 0),
                     new Point(width - 1, 0),
                     new Point(width - 1, height - 1),
                     new Point(0, height - 1)
             );
-            dstPoint.convertTo(dstPoint, CvType.CV_32F); // タイプをCV_32Fに変換
+            dstPoints.convertTo(dstPoints, CvType.CV_32F); // タイプをCV_32Fに変換
 
             // 変換前の座標と変換後の座標から透視変換行列(切り抜きたい領域を長方形に変換するための行列)を作る
-            transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoint);
+            transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
         }
 
-        Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
+        //Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
+        Mat clippedImage = new Mat((int) width, (int) height, image.type());
+
+        //Mat clippedImage = new Mat();
+
         Imgproc.warpPerspective(image, clippedImage, transformMatrix, clippedImage.size());
         return clippedImage;
 

@@ -123,7 +123,11 @@ public class YourService extends KiboRpcService {
 
         // unDistortedImg切り抜き
         Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
-        api.saveMatImage(clippedImage, "clippedImage.png");
+        if (clippedImage != null && !clippedImage.empty()) {
+            api.saveMatImage(clippedImage, "clippedImage.png");
+        } else {
+            Log.i(TAG, "clippedImage = null or clippedImage is empty");
+        }
 
         // } else{
         //     Log.i(TAG, "No AR markers detected");
