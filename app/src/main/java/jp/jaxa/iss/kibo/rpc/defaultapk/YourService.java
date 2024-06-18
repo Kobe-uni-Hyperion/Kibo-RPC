@@ -207,15 +207,13 @@ public class YourService extends KiboRpcService {
          * KOZ1の前まで行く
          */
         // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.7, bestPointToGoThroughKOZ1[2]);
-        // z軸負方向を軸として、-90度回転
-        Quaternion quaternion1WhenKOZ1 = QuaternionUtil.rotate(0, 0, -1, (float) ((-0.5) * Math.PI));
-        Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1WhenKOZ1, true);
+        Point point1ToGoThroughKOZ1 = new Point(11.21, -9.7, 5.27);
+        Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1, true);
 
         int loopCounter1KOZ1 = 0;
         while (!result1MoveToKOZ1.hasSucceeded() && loopCounter1KOZ1 < 5) {
             // retry
-            result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1WhenKOZ1, true);
+            result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1, true);
             ++loopCounter1KOZ1;
         }
 
@@ -224,15 +222,13 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1を通過する
          */
-        Point point2ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.1, bestPointToGoThroughKOZ1[2]);
-        // z軸負方向を軸として、-90度回転
-        Quaternion quaternion2WhenKOZ1 = QuaternionUtil.rotate(0, 0, -1, (float) ((-0.5) * Math.PI));
-        Result result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion2WhenKOZ1, true);
+        Point point2ToGoThroughKOZ1 = new Point(11.21, -8.875, 5.27);
+        Result result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion1, true);
 
         int loopCounter2KOZ1 = 0;
         while (!result2MoveToKOZ1.hasSucceeded() && loopCounter2KOZ1 < 5) {
             // retry
-            result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion2WhenKOZ1, true);
+            result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion1, true);
             ++loopCounter2KOZ1;
         }
 
