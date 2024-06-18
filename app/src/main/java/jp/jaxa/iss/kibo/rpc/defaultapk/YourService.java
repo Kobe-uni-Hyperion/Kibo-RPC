@@ -100,18 +100,11 @@ public class YourService extends KiboRpcService {
             Log.e(TAG, "Failed to capture image form NavCam.");
             return;
         }
-
         api.saveMatImage(image, "file_name.png");
-
-        /* *********************************************************************** */
-        /* 各エリアにあるアイテムの種類と数を認識するコード */
-        /* *********************************************************************** */
 
         // ARタグを検知する
         //if (!markerIds.empty()) {
         //Log.i(TAG, "ARtag!!!");
-
-
         // カメラ行列の取得
         Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
         cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
@@ -122,15 +115,14 @@ public class YourService extends KiboRpcService {
         cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
         // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
 
-
         // 歪みのないimageに変換
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
         Mat unDistortedImg = new Mat();
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
+        // unDistortedImg切り抜き
         Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
-
         api.saveMatImage(clippedImage, "clippedImage.png");
 
         // } else{
