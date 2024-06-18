@@ -18,12 +18,12 @@ public class ImageUtil {
         final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
 
         for (int i = 0; i < 4; i++) {
-            points[i] = new org.opencv.core.Point(corner.get(i, 0));
+            points[i] = new org.opencv.core.Point(corner.get(0, i));
         }
 
-        // y座標が降順になるように座標4点をソート
-        Arrays.sort(points, (p1, p2) -> Double.compare(p2.y, p1.y));
-        Point leftTop, rightTop, leftBottom, rightBottom;
+        // y座標が昇順になるように座標4点をソート
+        Arrays.sort(points, (p1, p2) -> Double.compare(p1.y, p2.y));
+        org.opencv.core.Point leftTop, rightTop, leftBottom, rightBottom;
 
         // 四角形の上二つの左右を決定
         if (points[0].x < points[1].x) {
@@ -45,6 +45,12 @@ public class ImageUtil {
         double width = Math.sqrt(Math.pow(leftTop.x - rightTop.x, 2) + Math.pow(leftTop.y - rightTop.y, 2));
         double height = Math.sqrt(Math.pow(leftTop.x - leftBottom.x, 2) + Math.pow(leftTop.y - leftBottom.y, 2));
 
+        // ここでコーナーの順序を調整
+        points[0] = leftTop;
+        points[1] = rightTop;
+        points[2] = rightBottom;
+        points[3] = leftBottom;
+
         Mat transformMatrix;
         {
             MatOfPoint2f srcPoints = new MatOfPoint2f(points);
@@ -62,12 +68,9 @@ public class ImageUtil {
             transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
         }
 
-        //Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
-        Mat clippedImage = new Mat((int) width, (int) height, image.type());
-
-        //Mat clippedImage = new Mat();
-
+        Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
         Imgproc.warpPerspective(image, clippedImage, transformMatrix, clippedImage.size());
+
         return clippedImage;
 
     }
