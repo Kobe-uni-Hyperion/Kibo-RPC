@@ -165,7 +165,9 @@ public class YourService extends KiboRpcService {
         /* Let's move to the each area and recognize the items. */
         /* **************************************************** */
 
-        // point2に移動して画像認識するコード
+        /**
+         * point2に移動して画像認識するコード
+         */
 
         // 現在の座標を取得
         Kinematics kinematicsAfterArea1 = api.getRobotKinematics();
