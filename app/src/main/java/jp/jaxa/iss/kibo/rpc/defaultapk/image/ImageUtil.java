@@ -10,46 +10,28 @@ import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ImageUtil {
     public static Mat clip(Mat image, Mat corner) {
 
         final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
-
+        // point[0]:ARコードの左上の座標, point[1]:右上の座標, point[2]:右下の座標, point[3]:左下の座標
         for (int i = 0; i < 4; i++) {
             points[i] = new org.opencv.core.Point(corner.get(0, i));
         }
+//        double[] corner0 = corner.get(0, 0);
+//        double[] corner1 = corner.get(0, 1);
+//        double[] corner2 = corner.get(0, 2);
+//        double[] corner3 = corner.get(0, 3);
+//
+//        // ARコードの4つの座標を台紙の4つの座標に変換する
+//        points[0] = new org.opencv.core.Point(3 * corner0[0], 2* corner0[1]);
+//        points[1] = new org.opencv.core.Point(3 *corner1[0], corner1[1]);
+//        points[2] = new org.opencv.core.Point(corner2[0], corner2[1]);
+//        points[3] = new org.opencv.core.Point(corner3[0], corner3[1]);
 
-        // y座標が昇順になるように座標4点をソート
-        Arrays.sort(points, (p1, p2) -> Double.compare(p1.y, p2.y));
-        org.opencv.core.Point leftTop, rightTop, leftBottom, rightBottom;
-
-        // 四角形の上二つの左右を決定
-        if (points[0].x < points[1].x) {
-            leftTop = points[0];
-            rightTop = points[1];
-        } else {
-            leftTop = points[1];
-            rightTop = points[0];
-        }
-        // 四角形の下二つの左右を決定
-        if (points[2].x < points[3].x) {
-            leftBottom = points[2];
-            rightBottom = points[3];
-        } else {
-            leftBottom = points[3];
-            rightBottom = points[2];
-        }
-
-        double width = Math.sqrt(Math.pow(leftTop.x - rightTop.x, 2) + Math.pow(leftTop.y - rightTop.y, 2));
-        double height = Math.sqrt(Math.pow(leftTop.x - leftBottom.x, 2) + Math.pow(leftTop.y - leftBottom.y, 2));
-
-        // ここでコーナーの順序を調整
-        points[0] = leftTop;
-        points[1] = rightTop;
-        points[2] = rightBottom;
-        points[3] = leftBottom;
+        double width = Math.sqrt(Math.pow(points[0].x - points[1].x, 2) + Math.pow(points[0].y - points[1].y, 2));
+        double height = Math.sqrt(Math.pow(points[0].x - points[3].x, 2) + Math.pow(points[0].y - points[3].y, 2));
 
         Mat transformMatrix;
         {
