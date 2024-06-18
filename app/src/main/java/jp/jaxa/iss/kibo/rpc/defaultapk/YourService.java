@@ -297,7 +297,7 @@ public class YourService extends KiboRpcService {
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(1, "item_name", 1);
+        api.setAreaInfo(2, "item_name", 1);
 
 
         /**
@@ -426,7 +426,7 @@ public class YourService extends KiboRpcService {
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(1, "item_name", 1);
+        api.setAreaInfo(3, "item_name", 1);
 
         /**
          * point4に移動して画像認識するコード
@@ -554,12 +554,67 @@ public class YourService extends KiboRpcService {
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(1, "item_name", 1);
+        api.setAreaInfo(4, "item_name", 1);
 
-        // 宇宙飛行士の前に移動するコード
+        /**
+         * 宇宙飛行士の前へ移動して画像認識するコード
+         */
 
-        // When you move to the front of the astronaut, report the rounding completion.
+        /**
+         * 宇宙飛行士の前(5cm手前)へ移動する
+         */
+        Point pointInFrontOfAstronaut = new Point(11.143, -6.8107, 4.9654);
+        // z軸正方向を軸として、90度回転
+        // 視野: y軸正方向へ変わる
+        Quaternion quaternionInFrontOfAstronaut = QuaternionUtil.rotate(0, 0, 1, (float) (0.5 * Math.PI));
+        Result resultMoveToAstronaut = api.moveTo(pointInFrontOfAstronaut, quaternionInFrontOfAstronaut, true);
+
+        int loopCounterAstronaut = 0;
+        while (!resultMoveToAstronaut.hasSucceeded() && loopCounterAstronaut < 5) {
+            // retry
+            resultMoveToAstronaut = api.moveTo(pointInFrontOfAstronaut, quaternionInFrontOfAstronaut, true);
+            ++loopCounterAstronaut;
+        }
+
+        Log.i(TAG, "InFrontOfAstronaut!!!!");
+
+        // 宇宙飛行士の前にたどり着いたことを通知、画像を取得
         api.reportRoundingCompletion();
+
+        Mat imageAstronaut = api.getMatNavCam();
+
+        // image4がnullの場合の対処を書く
+
+        api.saveMatImage(imageAstronaut, "astronaut.png");
+
+        /* *********************************************************************** */
+        /* 各エリアにあるアイテムの種類と数を認識するコード */
+        /* *********************************************************************** */
+
+        // ARタグを検知する
+        Dictionary dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        List<Mat> cornersAstronaut = new ArrayList<>();
+        Mat markerIdsAstronaut = new Mat();
+        Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
+
+        // カメラ行列の取得
+        Mat cameraMatrixAstronaut = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrixAstronaut.put(0, 0, api.getNavCamIntrinsics()[0]);
+        // 歪み係数の取得
+        Mat cameraCoefficientsAstronaut = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficientsAstronaut.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficientsAstronaut.convertTo(cameraCoefficientsAstronaut, CvType.CV_64F);
+
+        // 歪みのないimage
+        Mat unDistortedImgAstronaut = new Mat();
+        Calib3d.undistort(imageAstronaut, unDistortedImgAstronaut, cameraMatrixAstronaut, cameraCoefficientsAstronaut);
+
+        api.saveMatImage(unDistortedImgAstronaut, "unDistortedImgOfAreaAstronaut.png");
+
+        // ARタグからカメラまでの距離と傾きを求めて、
+        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+        // 画像認識
 
         /* ********************************************************** */
         /* Write your code to recognize which item the astronaut has. */
