@@ -11,6 +11,7 @@ import gov.nasa.arc.astrobee.Result;
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
+import jp.jaxa.iss.kibo.rpc.defaultapk.image.ImageUtil;
 import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 /**
@@ -128,29 +129,13 @@ public class YourService extends KiboRpcService {
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
-        Mat firstCorner = corners.get(0);
+        Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
 
-        // singleCorner:(4,2)行列
-        // ARタグのコーナー4点の座標を変数として保存し、log出力
-
-        //for (int i = 0; i < 4; i++) {
-        //    double[] point = corner.get(0, i);
-        //    Log.i(TAG, "Corner " + i + ": (" + point[0] + ", " + point[1] + ")");
-        //}
-        // singleCorner 行列のログ出力
-        // singleCorner: [804, 653, 792, 683, 766, 676, 779, 644]
-
-
-        // ARタグの位置と向きをログ出力
-        int markerId = (int) markerIds.get(0, 0)[0];
-        Log.i(TAG, "Marker ID: " + markerId + " rvec: " + rvec.dump() + " tvec: " + tvec.dump());
-
+        api.saveMatImage(clippedImage, "clippedImage.png");
 
         // } else{
         //     Log.i(TAG, "No AR markers detected");
         // }
-
-
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
