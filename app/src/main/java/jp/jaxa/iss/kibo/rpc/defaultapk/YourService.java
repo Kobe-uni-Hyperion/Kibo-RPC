@@ -78,27 +78,26 @@ public class YourService extends KiboRpcService {
 
         // KIZ2からKIZ1へ移動するために、まずZ軸正方向に移動し、その後、X軸正方向に移動する
         Point kiz2ToKiz1FirstMove = new Point(10.26, -9.806, 4.56);
-        // ここでは回転の必要なし
-        Quaternion quaternionKiz2ToKiz1FirstMove = QuaternionUtil.rotate(0, 0, 1, 0);
-        Result resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternionKiz2ToKiz1FirstMove, true);
+        // z軸負方向を軸として、90度回転
+        // 視野: ｘ軸正方向 => y軸負方向
+        Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, (float) (Math.PI * 0.5));
+        Result resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternion1, true);
 
         int loopCounterKiz2ToKiz1FirstMove = 0;
         while (!resultMoveToKiz1FirstMove.hasSucceeded() && loopCounterKiz2ToKiz1FirstMove < 5) {
             // retry
-            resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternionKiz2ToKiz1FirstMove, true);
+            resultMoveToKiz1FirstMove = api.moveTo(kiz2ToKiz1FirstMove, quaternion1, true);
             ++loopCounterKiz2ToKiz1FirstMove;
         }
 
         // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
         Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
-        // ここでは回転の必要なし
-        Quaternion quaternionKiz2ToKiz1 = QuaternionUtil.rotate(0, 0, 1, 0);
-        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
+        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
 
         int loopCounterKiz2ToKiz1 = 0;
         while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
             // retry
-            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternionKiz2ToKiz1, true);
+            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
             ++loopCounterKiz2ToKiz1;
         }
 
@@ -109,10 +108,8 @@ public class YourService extends KiboRpcService {
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        Point area1FirstViewPoint = new Point(10.95, -9.9, 5.195);
-        // z軸負方向を軸として、90度回転
-        // 視野: ｘ軸正方向 => y軸負方向
-        Quaternion quaternion1 = QuaternionUtil.rotate(0, 0, -1, (float) (Math.PI * 0.5));
+        // Area1の50cm手前に移動する
+        Point area1FirstViewPoint = new Point(10.95, -10.08, 5.195);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -191,17 +188,15 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
-                // KOZ1を通過する直前の点
+                // KOZ1をの通過点
                 // -9.7は、-9.5から0.2下がった値(20cm余分に取っている)
-                double[] point1InFrontOfKOZ1 = {x, -9.7, z};
+                double[] point1InFrontOfKOZ1 = {x, -9.475, z};
 
-                // KOZ1を通過した直後の点
-                // -9.25は、-9.45から0.2上がった値(20cm余分に取っている)
-                double[] point2InFrontOfKOZ1 = {x, -9.25, z};
-                double[] pointInFrontOfArea2 = {10.925, -8.875, 4.47};
+                // Area2(KIZ1)の5cm手前
+                double[] pointInFrontOfArea2 = {10.925, -8.875, 4.37};
 
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point2InFrontOfKOZ1, pointInFrontOfArea2);
+                double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point1InFrontOfKOZ1, pointInFrontOfArea2);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea2) {
@@ -215,40 +210,26 @@ public class YourService extends KiboRpcService {
          * KOZ1の前まで行く
          */
         // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.7, bestPointToGoThroughKOZ1[2]);
-        Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1, true);
+        Point point1ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], bestPointToGoThroughKOZ1[1], bestPointToGoThroughKOZ1[2]);
+        // y軸正方向を軸として、90度回転
+        // 視野: z軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternionInFrontOfArea2, true);
 
         int loopCounter1KOZ1 = 0;
         while (!result1MoveToKOZ1.hasSucceeded() && loopCounter1KOZ1 < 5) {
             // retry
-            result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternion1, true);
+            result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternionInFrontOfArea2, true);
             ++loopCounter1KOZ1;
         }
 
         Log.i(TAG, "InFrontOfKOZ1!!!!");
 
         /**
-         * KOZ1を通過する
-         */
-        Point point2ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], -9.25, bestPointToGoThroughKOZ1[2]);
-        Result result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion1, true);
-
-        int loopCounter2KOZ1 = 0;
-        while (!result2MoveToKOZ1.hasSucceeded() && loopCounter2KOZ1 < 5) {
-            // retry
-            result2MoveToKOZ1 = api.moveTo(point2ToGoThroughKOZ1, quaternion1, true);
-            ++loopCounter2KOZ1;
-        }
-
-        Log.i(TAG, "GoneThroughKOZ1!!!!");
-
-        /**
          * Area2に移動する
+         * Area2(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.47);
-        // y軸正方向を軸として、90度回転
-        // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -320,17 +301,14 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
-                // KOZ1を通過する直前の点
-                // -8.7は、-8.5から0.2下がった値(20cm余分に取っている)
-                double[] point1InFrontOfKOZ2 = {x, -8.7, z};
+                // KOZ2の通過点
+                double[] point1InFrontOfKOZ2 = {x, -8.475, z};
 
-                // KOZ1を通過した直後の点
-                // -8.25は、-8.45から0.2上がった値(20cm余分に取っている)
-                double[] point2InFrontOfKOZ2 = {x, -8.25, z};
-                double[] pointInFrontOfArea3 = {10.925, -7.925, 4.47};
+                // Area3(KIZ1)の5cm手前
+                double[] pointInFrontOfArea3 = {10.925, -7.925, 4.37};
 
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point2InFrontOfKOZ2, pointInFrontOfArea3);
+                double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point1InFrontOfKOZ2, pointInFrontOfArea3);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea3) {
@@ -344,40 +322,26 @@ public class YourService extends KiboRpcService {
          * KOZ2の前まで行く
          */
         // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], -8.7, bestPointToGoThroughKOZ2[2]);
-        Result result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+        Point point1ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], bestPointToGoThroughKOZ2[1], bestPointToGoThroughKOZ2[2]);
+        // y軸正方向を軸として、90度回転
+        // 視野: z軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Result result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea3, true);
 
         int loopCounter1KOZ2 = 0;
         while (!result1MoveToKOZ2.hasSucceeded() && loopCounter1KOZ2 < 5) {
             // retry
-            result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+            result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea3, true);
             ++loopCounter1KOZ2;
         }
 
         Log.i(TAG, "InFrontOfKOZ2!!!!");
 
         /**
-         * KOZ2を通過する
-         */
-        Point point2ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], -8.25, bestPointToGoThroughKOZ2[2]);
-        Result result2MoveToKOZ2 = api.moveTo(point2ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
-
-        int loopCounter2KOZ2 = 0;
-        while (!result2MoveToKOZ2.hasSucceeded() && loopCounter2KOZ2 < 5) {
-            // retry
-            result2MoveToKOZ2 = api.moveTo(point2ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
-            ++loopCounter2KOZ2;
-        }
-
-        Log.i(TAG, "GoneThroughKOZ2!!!!");
-
-        /**
          * Area3に移動する
+         * Area3(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.47);
-        // y軸正方向を軸として、90度回転
-        // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
         Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
 
         int loopCounterArea3 = 0;
@@ -448,22 +412,24 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
-                // KOZ1を通過する直前の点
-                // -8.7は、-8.5から0.2下がった値(20cm余分に取っている)
-                double[] point1InFrontOfKOZ3 = {x, -8.7, z};
+                Log.i(TAG, "x: " + x + ", z: " + z);
 
-                // KOZ1を通過した直後の点
-                // -8.25は、-8.45から0.2上がった値(20cm余分に取っている)
-                double[] point2InFrontOfKOZ3 = {x, -8.25, z};
-                double[] pointInFrontOfArea4 = {10.925, -7.925, 4.47};
+                // KOZ3の通過点
+                double[] point1InFrontOfKOZ3 = {x, -7.375, z};
+
+                Log.i(TAG, "point1InFrontOfKOZ3: " + point1InFrontOfKOZ3[0] + ", " + point1InFrontOfKOZ3[1] + ", " + point1InFrontOfKOZ3[2]);
+
+                // Area4(KIZ1)の5cm手前
+                double[] pointInFrontOfArea4 = {10.35, -6.9875, 4.945};
 
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point2InFrontOfKOZ3, pointInFrontOfArea4);
+                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point1InFrontOfKOZ3, pointInFrontOfArea4);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea4) {
                     minDistanceToArea4 = distance;
                     bestPointToGoThroughKOZ3 = point1InFrontOfKOZ3;
+                    Log.i(TAG, "bestPointToGoThroughKOZ3: " + bestPointToGoThroughKOZ3[0] + ", " + bestPointToGoThroughKOZ3[1] + ", " + bestPointToGoThroughKOZ3[2]);
                 }
             }
         }
@@ -472,40 +438,26 @@ public class YourService extends KiboRpcService {
          * KOZ3の前まで行く
          */
         // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], -7.6, bestPointToGoThroughKOZ3[2]);
-        Result result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+        Point point1ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], bestPointToGoThroughKOZ3[1], bestPointToGoThroughKOZ3[2]);
+        // z軸正方向を軸として、180度回転
+        // 視野: x軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(0, 0, 1, (float) (Math.PI));
+        Result result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea4, true);
 
         int loopCounter1KOZ3 = 0;
         while (!result1MoveToKOZ3.hasSucceeded() && loopCounter1KOZ3 < 5) {
             // retry
-            result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+            result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea4, true);
             ++loopCounter1KOZ3;
         }
 
         Log.i(TAG, "InFrontOfKOZ3!!!!");
 
         /**
-         * KOZ3を通過する
-         */
-        Point point2ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], -7.15, bestPointToGoThroughKOZ3[2]);
-        Result result2MoveToKOZ3 = api.moveTo(point2ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
-
-        int loopCounter2KOZ3 = 0;
-        while (!result2MoveToKOZ3.hasSucceeded() && loopCounter2KOZ3 < 5) {
-            // retry
-            result2MoveToKOZ3 = api.moveTo(point2ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
-            ++loopCounter2KOZ3;
-        }
-
-        Log.i(TAG, "GoneThroughKOZ3!!!!");
-
-        /**
          * Area4に移動する
+         * Area4(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea4 = new Point(10.45, -6.9875, 4.945);
-        // z軸正方向を軸として、180度回転
-        // 視野: x軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(0, 0, 1, (float) (Math.PI));
+        Point pointInFrontOfArea4 = new Point(10.35, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -560,10 +512,7 @@ public class YourService extends KiboRpcService {
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
 
-        /**
-         * 宇宙飛行士の前(5cm手前)へ移動する
-         */
-        Point pointInFrontOfAstronaut = new Point(11.143, -6.8107, 4.9654);
+        Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
         // 視野: y軸正方向へ変わる
         Quaternion quaternionInFrontOfAstronaut = QuaternionUtil.rotate(0, 0, 1, (float) (0.5 * Math.PI));
@@ -576,26 +525,33 @@ public class YourService extends KiboRpcService {
             ++loopCounterAstronaut;
         }
 
-        Log.i(TAG, "InFrontOfAstronaut!!!!");
-
         // 宇宙飛行士の前にたどり着いたことを通知、画像を取得
         api.reportRoundingCompletion();
 
+        Log.i(TAG, "InFrontOfAstronaut!!!!");
+
         Mat imageAstronaut = api.getMatNavCam();
 
-        // image4がnullの場合の対処を書く
+        // imageAstronautがnullの場合の対処を書く
 
         api.saveMatImage(imageAstronaut, "astronaut.png");
-
-        /* *********************************************************************** */
-        /* 各エリアにあるアイテムの種類と数を認識するコード */
-        /* *********************************************************************** */
 
         // ARタグを検知する
         Dictionary dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         List<Mat> cornersAstronaut = new ArrayList<>();
         Mat markerIdsAstronaut = new Mat();
         Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
+
+        int loopCounterAstronautImage = 0;
+        while (markerIdsAstronaut.empty() && loopCounterAstronautImage < 10) {
+            imageAstronaut = api.getMatNavCam();
+            api.saveMatImage(imageAstronaut, "astronaut.png");
+            dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+            cornersAstronaut = new ArrayList<>();
+            markerIdsAstronaut = new Mat();
+            Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
+            loopCounterAstronautImage++;
+        }
 
         // カメラ行列の取得
         Mat cameraMatrixAstronaut = new Mat(3, 3, CvType.CV_64F);
