@@ -53,6 +53,12 @@ public class YourService extends KiboRpcService {
         double[][] koz1Position1 = {{10.67, -9.5, 4.07}, {11.8, -9.45, 5.17}};
         double[][] koz1Position2 = {{10.05, -9.5, 4.77}, {11.07, -9.45, 5.82}};
 
+        double[][] koz2Position1 = {{10.67, -8.5, 4.77}, {11.8, -8.45, 5.82}};
+        double[][] koz2Position2 = {{10.05, -8.5, 4.07}, {10.9, -8.45, 5.17}};
+
+        double[][] koz3Position1 = {{10.67, -7.4, 4.07}, {11.8, -7.35, 5.17}};
+        double[][] koz3Position2 = {{10.05, -7.4, 4.77}, {11.07, -7.35, 5.82}};
+
         Log.i(TAG, "Start mission!!!");
 
         // The mission starts.
@@ -192,7 +198,7 @@ public class YourService extends KiboRpcService {
                 // KOZ1を通過した直後の点
                 // -9.25は、-9.45から0.2上がった値(20cm余分に取っている)
                 double[] point2InFrontOfKOZ1 = {x, -9.25, z};
-                double[] pointInFrontOfArea2 = {10.925, -8.875, 4.26203};
+                double[] pointInFrontOfArea2 = {10.925, -8.875, 4.47};
 
                 // 距離の計算
                 double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point2InFrontOfKOZ1, pointInFrontOfArea2);
@@ -294,9 +300,261 @@ public class YourService extends KiboRpcService {
         api.setAreaInfo(1, "item_name", 1);
 
 
-        // point3に移動して画像認識するコード
+        /**
+         * point3に移動して画像認識するコード
+         */
 
-        // point4に移動して画像認識するコード
+        // 現在の座標を取得
+        Kinematics kinematicsAfterArea2 = api.getRobotKinematics();
+        Point pointAfterArea2 = kinematicsAfterArea2.getPosition();
+
+        double minDistanceToArea3 = Double.MAX_VALUE;
+        double[] bestPointToGoThroughKOZ2 = new double[3];
+
+        // 0.01刻みでpointInFrontOfKOZ2を探索する　
+        // 多分これUtil化したほうがいい
+        for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
+            for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
+                // KOZを避けているか確認
+                if (isInKOZ(x, z, koz2Position1) || isInKOZ(x, z, koz2Position2)) {
+                    continue;
+                }
+
+                // KOZ1を通過する直前の点
+                // -8.7は、-8.5から0.2下がった値(20cm余分に取っている)
+                double[] point1InFrontOfKOZ2 = {x, -8.7, z};
+
+                // KOZ1を通過した直後の点
+                // -8.25は、-8.45から0.2上がった値(20cm余分に取っている)
+                double[] point2InFrontOfKOZ2 = {x, -8.25, z};
+                double[] pointInFrontOfArea3 = {10.925, -7.925, 4.47};
+
+                // 距離の計算
+                double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point2InFrontOfKOZ2, pointInFrontOfArea3);
+
+                // 最短距離を更新
+                if (distance < minDistanceToArea3) {
+                    minDistanceToArea3 = distance;
+                    bestPointToGoThroughKOZ2 = point1InFrontOfKOZ2;
+                }
+            }
+        }
+
+        /**
+         * KOZ2の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], -8.7, bestPointToGoThroughKOZ2[2]);
+        Result result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+
+        int loopCounter1KOZ2 = 0;
+        while (!result1MoveToKOZ2.hasSucceeded() && loopCounter1KOZ2 < 5) {
+            // retry
+            result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+            ++loopCounter1KOZ2;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ2!!!!");
+
+        /**
+         * KOZ2を通過する
+         */
+        Point point2ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], -8.25, bestPointToGoThroughKOZ2[2]);
+        Result result2MoveToKOZ2 = api.moveTo(point2ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+
+        int loopCounter2KOZ2 = 0;
+        while (!result2MoveToKOZ2.hasSucceeded() && loopCounter2KOZ2 < 5) {
+            // retry
+            result2MoveToKOZ2 = api.moveTo(point2ToGoThroughKOZ2, quaternionInFrontOfArea2, true);
+            ++loopCounter2KOZ2;
+        }
+
+        Log.i(TAG, "GoneThroughKOZ2!!!!");
+
+        /**
+         * Area3に移動する
+         */
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.47);
+        // y軸正方向を軸として、90度回転
+        // 視野: z軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
+
+        int loopCounterArea3 = 0;
+        while (!resultMoveToArea3.hasSucceeded() && loopCounterArea3 < 5) {
+            // retry
+            resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
+            ++loopCounterArea3;
+        }
+
+        Log.i(TAG, "InFrontOfArea3!!!!");
+
+        Mat image3 = api.getMatNavCam();
+
+        // image3がnullの場合の対処を書く
+
+        api.saveMatImage(image3, "area3.png");
+
+        /* *********************************************************************** */
+        /* 各エリアにあるアイテムの種類と数を認識するコード */
+        /* *********************************************************************** */
+
+        // ARタグを検知する
+        Dictionary dictionary3 = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        List<Mat> corners3 = new ArrayList<>();
+        Mat markerIds3 = new Mat();
+        Aruco.detectMarkers(image3, dictionary3, corners3, markerIds3);
+
+        // カメラ行列の取得
+        Mat cameraMatrix3 = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrix3.put(0, 0, api.getNavCamIntrinsics()[0]);
+        // 歪み係数の取得
+        Mat cameraCoefficients3 = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficients3.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficients3.convertTo(cameraCoefficients3, CvType.CV_64F);
+
+        // 歪みのないimage
+        Mat unDistortedImg3 = new Mat();
+        Calib3d.undistort(image3, unDistortedImg3, cameraMatrix3, cameraCoefficients3);
+
+        api.saveMatImage(unDistortedImg3, "unDistortedImgOfArea3.png");
+
+        // ARタグからカメラまでの距離と傾きを求めて、
+        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+        // 画像認識
+
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(1, "item_name", 1);
+
+        /**
+         * point4に移動して画像認識するコード
+         */
+
+        // 現在の座標を取得
+        Kinematics kinematicsAfterArea3 = api.getRobotKinematics();
+        Point pointAfterArea3 = kinematicsAfterArea3.getPosition();
+
+        double minDistanceToArea4 = Double.MAX_VALUE;
+        double[] bestPointToGoThroughKOZ3 = new double[3];
+
+        // 0.01刻みでpointInFrontOfKOZ3を探索する　
+        // 多分これUtil化したほうがいい
+        for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
+            for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
+                // KOZを避けているか確認
+                if (isInKOZ(x, z, koz3Position1) || isInKOZ(x, z, koz3Position2)) {
+                    continue;
+                }
+
+                // KOZ1を通過する直前の点
+                // -8.7は、-8.5から0.2下がった値(20cm余分に取っている)
+                double[] point1InFrontOfKOZ3 = {x, -8.7, z};
+
+                // KOZ1を通過した直後の点
+                // -8.25は、-8.45から0.2上がった値(20cm余分に取っている)
+                double[] point2InFrontOfKOZ3 = {x, -8.25, z};
+                double[] pointInFrontOfArea4 = {10.925, -7.925, 4.47};
+
+                // 距離の計算
+                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point2InFrontOfKOZ3, pointInFrontOfArea4);
+
+                // 最短距離を更新
+                if (distance < minDistanceToArea4) {
+                    minDistanceToArea4 = distance;
+                    bestPointToGoThroughKOZ3 = point1InFrontOfKOZ3;
+                }
+            }
+        }
+
+        /**
+         * KOZ3の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], -7.6, bestPointToGoThroughKOZ3[2]);
+        Result result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+
+        int loopCounter1KOZ3 = 0;
+        while (!result1MoveToKOZ3.hasSucceeded() && loopCounter1KOZ3 < 5) {
+            // retry
+            result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+            ++loopCounter1KOZ3;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ3!!!!");
+
+        /**
+         * KOZ3を通過する
+         */
+        Point point2ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], -7.15, bestPointToGoThroughKOZ3[2]);
+        Result result2MoveToKOZ3 = api.moveTo(point2ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+
+        int loopCounter2KOZ3 = 0;
+        while (!result2MoveToKOZ3.hasSucceeded() && loopCounter2KOZ3 < 5) {
+            // retry
+            result2MoveToKOZ3 = api.moveTo(point2ToGoThroughKOZ3, quaternionInFrontOfArea3, true);
+            ++loopCounter2KOZ3;
+        }
+
+        Log.i(TAG, "GoneThroughKOZ3!!!!");
+
+        /**
+         * Area4に移動する
+         */
+        Point pointInFrontOfArea4 = new Point(10.45, -6.9875, 4.945);
+        // z軸正方向を軸として、180度回転
+        // 視野: x軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(0, 0, 1, (float) (Math.PI));
+        Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
+
+        int loopCounterArea4 = 0;
+        while (!resultMoveToArea4.hasSucceeded() && loopCounterArea4 < 5) {
+            // retry
+            resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
+            ++loopCounterArea4;
+        }
+
+        Log.i(TAG, "InFrontOfArea4!!!!");
+
+        Mat image4 = api.getMatNavCam();
+
+        // image4がnullの場合の対処を書く
+
+        api.saveMatImage(image4, "area4.png");
+
+        /* *********************************************************************** */
+        /* 各エリアにあるアイテムの種類と数を認識するコード */
+        /* *********************************************************************** */
+
+        // ARタグを検知する
+        Dictionary dictionary4 = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        List<Mat> corners4 = new ArrayList<>();
+        Mat markerIds4 = new Mat();
+        Aruco.detectMarkers(image4, dictionary4, corners4, markerIds4);
+
+        // カメラ行列の取得
+        Mat cameraMatrix4 = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrix4.put(0, 0, api.getNavCamIntrinsics()[0]);
+        // 歪み係数の取得
+        Mat cameraCoefficients4 = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficients4.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficients4.convertTo(cameraCoefficients4, CvType.CV_64F);
+
+        // 歪みのないimage
+        Mat unDistortedImg4 = new Mat();
+        Calib3d.undistort(image4, unDistortedImg4, cameraMatrix4, cameraCoefficients4);
+
+        api.saveMatImage(unDistortedImg4, "unDistortedImgOfArea4.png");
+
+        // ARタグからカメラまでの距離と傾きを求めて、
+        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+        // 画像認識
+
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(1, "item_name", 1);
 
         // 宇宙飛行士の前に移動するコード
 
