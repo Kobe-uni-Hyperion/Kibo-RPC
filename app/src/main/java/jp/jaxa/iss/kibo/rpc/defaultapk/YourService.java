@@ -156,9 +156,8 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
-        // TODO TODO imageがnullの場合の対処を書く
+        // TODO imageがnullの場合の対処を書く
 
-        api.saveMatImage(image, "area1.png");
         api.saveMatImage(image, "area1.png");
 
         String area1_item_name = "beaker";
@@ -213,8 +212,6 @@ public class YourService extends KiboRpcService {
 
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
-
-        // TODO TODO 画像認識
 
         /* **************************************************** */
         /* Let's move to the each area and recognize the items. */
@@ -316,7 +313,6 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // TODO 画像認識
 
         /**
          * point3に移動して画像認識するコード
@@ -402,8 +398,6 @@ public class YourService extends KiboRpcService {
 
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
-
-        //  TODO 画像認識
 
 
         /**
@@ -503,11 +497,13 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // TODO 画像認識
 
         /**
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
+
+        // Flash light off
+        api.flashlightControlFront(0);
 
         Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
@@ -568,10 +564,8 @@ public class YourService extends KiboRpcService {
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
         int targetItemID;
-        // 暫定で1にしている
         targetItemID = 1;
 
-        // TODO 画像認識
 
         String astronaut_item_name = "beaker";
         int astronaut_item_num = 3;
@@ -610,17 +604,9 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfAstronaut!!!!");
 
-
-        // imageAstronautがnullの場合の対処を書く
-
-        api.saveMatImage(imageAstronaut, "astronaut.png");
-
-
-
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
-
-        // TODO 画像認識
+        
 
         /* ********************************************************** */
         /* Write your code to recognize which item the astronaut has. */
