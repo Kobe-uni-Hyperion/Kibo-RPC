@@ -143,12 +143,23 @@ public class YourService extends KiboRpcService {
         double[] corner2 = corner.get(0, 2);
         double[] corner3 = corner.get(0, 3);
 
-        // ARコードの4つの座標を台紙の4つの座標に変換する
+        Log.i(TAG, "corner0: x=" + corner0[0] + ", y=" + corner0[1]);
+        Log.i(TAG, "corner1: x=" + corner1[0] + ", y=" + corner1[1]);
+        Log.i(TAG, "corner2: x=" + corner2[0] + ", y=" + corner2[1]);
+        Log.i(TAG, "corner3: x=" + corner3[0] + ", y=" + corner3[1]);
 
-        points[0] = new org.opencv.core.Point(-83 / 20 * (corner1[0] - corner0[0]) - 1 / 4 * (corner3[0] - corner0[0]) + corner0[0], -83 / 20 * (corner1[1] - corner0[1]) - 1 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
-        points[1] = new org.opencv.core.Point(-3 / 20 * (corner1[0] - corner0[0]) - 1 / 4 * (corner3[0] - corner0[0]) + corner0[0], -3 / 20 * (corner1[1] - corner0[1]) - 1 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
-        points[2] = new org.opencv.core.Point(-3 / 20 * (corner1[0] - corner0[0]) + 11 / 4 * (corner3[0] - corner0[0]) + corner0[0], -3 / 20 * (corner1[1] - corner0[1]) + 11 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
-        points[3] = new org.opencv.core.Point(-83 / 20 * (corner1[0] - corner0[0]) + 11 / 4 * (corner3[0] - corner0[0]) + corner0[0], -83 / 20 * (corner1[1] - corner0[1]) + 11 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+
+        // ARコードの4つの座標を台紙の4つの座標に変換する//
+        //points[0] = new org.opencv.core.Point(corner0[0], corner0[1]);
+//        points[1] = new org.opencv.core.Point(corner1[0], corner1[1]);
+//        points[2] = new org.opencv.core.Point(corner2[0], corner2[1]);
+//        points[3] = new org.opencv.core.Point(corner3[0], corner3[1]);
+
+
+        points[0] = new org.opencv.core.Point(-103 / 20 * (corner1[0] - corner0[0]) - 5 / 4 * (corner3[0] - corner0[0]) + corner0[0], -103 / 20 * (corner1[1] - corner0[1]) - 5 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[1] = new org.opencv.core.Point(-17 / 20 * (corner1[0] - corner0[0]) - 5 / 4 * (corner3[0] - corner0[0]) + corner0[0], -17 / 20 * (corner1[1] - corner0[1]) - 5 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[2] = new org.opencv.core.Point(-17 / 20 * (corner1[0] - corner0[0]) + 15 / 4 * (corner3[0] - corner0[0]) + corner0[0], -17 / 20 * (corner1[1] - corner0[1]) + 15 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[3] = new org.opencv.core.Point(-103 / 20 * (corner1[0] - corner0[0]) + 15 / 4 * (corner3[0] - corner0[0]) + corner0[0], -103 / 20 * (corner1[1] - corner0[1]) + 15 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
 
         for (int i = 0; i < 4; i++) {
             Log.i(TAG, "points[" + i + "] : " + points[i]);
