@@ -110,6 +110,7 @@ public class YourService extends KiboRpcService {
         // y座標をArea1に近づける
         // Area1の60cm手前に移動する
         Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
+        double[] pointInFrontOfArea1Double = {10.95, -9.98, 4.595};
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -419,12 +420,8 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
-                Log.i(TAG, "x: " + x + ", z: " + z);
-
                 // KOZ3の通過点
                 double[] point1InFrontOfKOZ3 = {x, -7.375, z};
-
-                Log.i(TAG, "point1InFrontOfKOZ3: " + point1InFrontOfKOZ3[0] + ", " + point1InFrontOfKOZ3[1] + ", " + point1InFrontOfKOZ3[2]);
 
                 // 距離の計算
                 double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point1InFrontOfKOZ3, pointInFrontOfArea4Double);
@@ -590,6 +587,127 @@ public class YourService extends KiboRpcService {
          * Write your code to move Astrobee to the location of the target item (what the
          * astronaut is looking for)
          */
+
+        int targetItemID;
+        // 暫定で1にしている
+        targetItemID = 1;
+
+        // 現在の座標を取得
+        Kinematics kinematicsAfterAstronaut = api.getRobotKinematics();
+        Point pointAfterAstronaut = kinematicsAfterAstronaut.getPosition();
+
+        double minDistanceFromAstronautToArea1 = Double.MAX_VALUE;
+        double[] bestPointToGoThroughKOZ3WhenReturn = new double[3];
+        double[] bestPointToGoThroughKOZ2WhenReturn = new double[3];
+        double[] bestPointToGoThroughKOZ1WhenReturn = new double[3];
+
+        // 0.01刻みでpointInFrontOfKOZ3を探索する
+        for (double koz3X = kiz1XMin + 0.2; koz3X <= kiz1XMax - 0.2 ; koz3X += 0.01) {
+            for(double koz3Z = kiz1ZMin + 0.2; koz3Z <= kiz1ZMax - 0.2; koz3Z += 0.01){
+                for(double koz2X = kiz1XMin + 0.2; koz2X <= kiz1XMax - 0.2 ; koz2X += 0.01) {
+                    for(double koz2Z = kiz1ZMin + 0.2; koz2Z <= kiz1ZMax - 0.2; koz2Z += 0.01){
+                        for(double koz1X = kiz1XMin + 0.2; koz1X <= kiz1XMax - 0.2 ; koz1X += 0.01) {
+                            for(double koz1Z = kiz1ZMin + 0.2; koz1Z <= kiz1ZMax - 0.2; koz1Z += 0.01){
+                                // KOZを避けているか確認
+                                if (isInKOZ(koz3X, koz3Z, koz3Position1) || isInKOZ(koz3X, koz3Z, koz3Position2)) {
+                                    continue;
+                                }
+                                if (isInKOZ(koz2X, koz2Z, koz2Position1) || isInKOZ(koz2X, koz2Z, koz2Position2)) {
+                                    continue;
+                                }
+                                if (isInKOZ(koz1X, koz1Z, koz1Position1) || isInKOZ(koz1X, koz1Z, koz1Position2)) {
+                                    continue;
+                                }
+
+                                // KOZ3の通過点
+                                double[] point1InFrontOfKOZ3WhenReturn = {koz3X, -7.375, koz3Z};
+                                // KOZ2の通過点
+                                double[] point1InFrontOfKOZ2WhenReturn = {koz2X, -8.475, koz2Z};
+                                // KOZ1の通過点
+                                double[] point1InFrontOfKOZ1WhenReturn = {koz1X, -9.475, koz1Z};
+
+                                // 距離の計算
+                                double distance = calculateDistance(new double[]{pointAfterAstronaut.getX(), pointAfterAstronaut.getY(), pointAfterAstronaut.getZ()}, point1InFrontOfKOZ3WhenReturn) + calculateDistance(point1InFrontOfKOZ3WhenReturn, point1InFrontOfKOZ2WhenReturn) + calculateDistance(point1InFrontOfKOZ2WhenReturn, point1InFrontOfKOZ1WhenReturn) + calculateDistance(point1InFrontOfKOZ1WhenReturn, pointInFrontOfArea1Double);
+
+                                // 最短距離を更新
+                                if (distance < minDistanceFromAstronautToArea1) {
+                                    minDistanceFromAstronautToArea1 = distance;
+                                    bestPointToGoThroughKOZ3WhenReturn = point1InFrontOfKOZ3WhenReturn;
+                                    bestPointToGoThroughKOZ2WhenReturn = point1InFrontOfKOZ2WhenReturn;
+                                    bestPointToGoThroughKOZ1WhenReturn = point1InFrontOfKOZ1WhenReturn;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /**
+         * KOZ3の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ3WhenReturn = new Point(bestPointToGoThroughKOZ3WhenReturn[0], bestPointToGoThroughKOZ3WhenReturn[1], bestPointToGoThroughKOZ3WhenReturn[2]);
+        Result result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ3WhenReturn = 0;
+        while (!result1MoveToKOZ3WhenReturn.hasSucceeded() && loopCounter1KOZ3WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ3WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ3WhenReturn!!!!");
+
+        /**
+         * KOZ2の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ2WhenReturn = new Point(bestPointToGoThroughKOZ2WhenReturn[0], bestPointToGoThroughKOZ2WhenReturn[1], bestPointToGoThroughKOZ2WhenReturn[2]);
+        Result result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ2WhenReturn = 0;
+        while (!result1MoveToKOZ2WhenReturn.hasSucceeded() && loopCounter1KOZ2WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ2WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ2WhenReturn!!!!");
+
+        /**
+         * KOZ1の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ1WhenReturn = new Point(bestPointToGoThroughKOZ1WhenReturn[0], bestPointToGoThroughKOZ1WhenReturn[1], bestPointToGoThroughKOZ1WhenReturn[2]);
+        Result result1MoveToKOZ1WhenReturn = api.moveTo(point1ToGoThroughKOZ1WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ1WhenReturn = 0;
+        while (!result1MoveToKOZ1WhenReturn.hasSucceeded() && loopCounter1KOZ1WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ1WhenReturn = api.moveTo(point1ToGoThroughKOZ1WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ1WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ1WhenReturn!!!!");
+
+        /**
+         * Area1に移動する
+         */
+        resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
+
+        int loopCounterArea1WhenReturn = 0;
+        while (!resultMoveToArea1.hasSucceeded() && loopCounterArea1WhenReturn < 5) {
+            // retry
+            resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
+            ++loopCounterArea1WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfArea1WhenReturn!!!!");
+
+        Mat imageAfterReturn = api.getMatNavCam();
+        api.saveMatImage(imageAfterReturn, "afterReturn.png");
+
         /*
          * *****************************************************************************
          * **************************
