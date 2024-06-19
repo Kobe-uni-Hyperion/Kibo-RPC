@@ -102,22 +102,16 @@ public class YourService extends KiboRpcService {
         }
         api.saveMatImage(image, "file_name.png");
 
-        // ARタグを検知する
-        //if (!markerIds.empty()) {
-        //Log.i(TAG, "ARtag!!!");
-        // カメラ行列の取得
+
         Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
         cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
-        // Log.i(TAG,"cameraMatrix is" + cameraMatrix);
 
-        // 歪み係数の取得
         Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
         cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
-        // Log.i(TAG,"cameraCoefficients is" + cameraCoefficients);
 
-        // 歪みのないimageに変換
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
         Mat unDistortedImg = new Mat();
+        
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
@@ -129,9 +123,6 @@ public class YourService extends KiboRpcService {
             Log.i(TAG, "clippedImage = null or clippedImage is empty");
         }
 
-        // } else{
-        //     Log.i(TAG, "No AR markers detected");
-        // }
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
