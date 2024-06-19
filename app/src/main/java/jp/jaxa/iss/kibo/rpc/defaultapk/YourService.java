@@ -188,14 +188,14 @@ public class YourService extends KiboRpcService {
         transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
 
 
-        Log.i(TAG, "transformMatrix is" + transformMatrix);
-        // transformMatrix の値をログに出力
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                double value = transformMatrix.get(row, col)[0];
-                Log.i(TAG, "transformMatrix[" + row + "][" + col + "] = " + value);
-            }
-        }
+        // Log.i(TAG, "transformMatrix is" + transformMatrix);
+        // // transformMatrix の値をログに出力
+        // for (int row = 0; row < 3; row++) {
+        //     for (int col = 0; col < 3; col++) {
+        //         double value = transformMatrix.get(row, col)[0];
+        //         Log.i(TAG, "transformMatrix[" + row + "][" + col + "] = " + value);
+        //     }
+        // }
 
         Mat clippedImage = Mat.zeros((int) width, (int) height, unDistortedImg.type());
 
