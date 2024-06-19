@@ -471,8 +471,6 @@ public class YourService extends KiboRpcService {
         // 暫定で1にしている
         targetItemID = 1;
 
-        // 現在の座標を取得
-
         /**
          * KOZ3の前まで行く
          */
