@@ -108,8 +108,8 @@ public class YourService extends KiboRpcService {
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        // Area1の55cm手前に移動する
-        Point area1FirstViewPoint = new Point(10.95, -10.03, 5.195);
+        // Area1の60cm手前に移動する
+        Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -402,8 +402,8 @@ public class YourService extends KiboRpcService {
         double[] bestPointToGoThroughKOZ3 = new double[3];
 
 
-        // Area4の55cm手前
-        double[] pointInFrontOfArea4Double = {10.41, -6.9875, 4.945};
+        // Area4の60cm手前
+        double[] pointInFrontOfArea4Double = {10.46, -6.9875, 4.945};
 
         // 0.01刻みでpointInFrontOfKOZ3を探索する　
         // 多分これUtil化したほうがいい
