@@ -128,7 +128,7 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
-        // imageがnullの場合の対処を書く
+        // TODO imageがnullの場合の対処を書く
 
         api.saveMatImage(image, "area1.png");
 
@@ -159,7 +159,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -192,7 +192,7 @@ public class YourService extends KiboRpcService {
                     continue;
                 }
 
-                // KOZ1をの通過点
+                // KOZ1の通過点
                 // -9.7は、-9.5から0.2下がった値(20cm余分に取っている)
                 double[] point1InFrontOfKOZ1 = {x, -9.475, z};
 
@@ -243,7 +243,7 @@ public class YourService extends KiboRpcService {
 
         Mat image2 = api.getMatNavCam();
 
-        // image2がnullの場合の対処を書く
+        // TODO image2がnullの場合の対処を書く
 
         api.saveMatImage(image2, "area2.png");
 
@@ -274,7 +274,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -359,7 +359,7 @@ public class YourService extends KiboRpcService {
 
         Mat image3 = api.getMatNavCam();
 
-        // image3がnullの場合の対処を書く
+        // TODO image3がnullの場合の対処を書く
 
         api.saveMatImage(image3, "area3.png");
 
@@ -390,7 +390,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        //  TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -471,7 +471,7 @@ public class YourService extends KiboRpcService {
 
         Mat image4 = api.getMatNavCam();
 
-        // image4がnullの場合の対処を書く
+        // TODO image4がnullの場合の対処を書く
 
         api.saveMatImage(image4, "area4.png");
 
@@ -502,7 +502,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -570,7 +570,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         /* ********************************************************** */
         /* Write your code to recognize which item the astronaut has. */
