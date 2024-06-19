@@ -108,8 +108,8 @@ public class YourService extends KiboRpcService {
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        // Area1の50cm手前に移動する
-        Point area1FirstViewPoint = new Point(10.95, -10.08, 5.195);
+        // Area1の55cm手前に移動する
+        Point area1FirstViewPoint = new Point(10.95, -10.03, 5.195);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -179,6 +179,9 @@ public class YourService extends KiboRpcService {
         double minDistanceToArea2 = Double.MAX_VALUE;
         double[] bestPointToGoThroughKOZ1 = new double[3];
 
+        // Area2(KIZ1)の5cm手前
+        double[] pointInFrontOfArea2Double = {10.925, -8.875, 4.37};
+
         // 0.01刻みでpointInFrontOfKOZ1を探索する　
         // 多分これUtil化したほうがいい
         for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
@@ -192,11 +195,8 @@ public class YourService extends KiboRpcService {
                 // -9.7は、-9.5から0.2下がった値(20cm余分に取っている)
                 double[] point1InFrontOfKOZ1 = {x, -9.475, z};
 
-                // Area2(KIZ1)の5cm手前
-                double[] pointInFrontOfArea2 = {10.925, -8.875, 4.37};
-
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point1InFrontOfKOZ1, pointInFrontOfArea2);
+                double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point1InFrontOfKOZ1, pointInFrontOfArea2Double);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea2) {
@@ -227,9 +227,8 @@ public class YourService extends KiboRpcService {
 
         /**
          * Area2に移動する
-         * Area2(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
+        Point pointInFrontOfArea2 = new Point(pointInFrontOfArea2Double[0], pointInFrontOfArea2Double[1], pointInFrontOfArea2Double[2]);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -292,6 +291,9 @@ public class YourService extends KiboRpcService {
         double minDistanceToArea3 = Double.MAX_VALUE;
         double[] bestPointToGoThroughKOZ2 = new double[3];
 
+        // Area3(KIZ1)の5cm手前
+        double[] pointInFrontOfArea3Double = {10.925, -7.925, 4.37};
+
         // 0.01刻みでpointInFrontOfKOZ2を探索する　
         // 多分これUtil化したほうがいい
         for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
@@ -304,11 +306,8 @@ public class YourService extends KiboRpcService {
                 // KOZ2の通過点
                 double[] point1InFrontOfKOZ2 = {x, -8.475, z};
 
-                // Area3(KIZ1)の5cm手前
-                double[] pointInFrontOfArea3 = {10.925, -7.925, 4.37};
-
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point1InFrontOfKOZ2, pointInFrontOfArea3);
+                double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point1InFrontOfKOZ2, pointInFrontOfArea3Double);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea3) {
@@ -339,9 +338,8 @@ public class YourService extends KiboRpcService {
 
         /**
          * Area3に移動する
-         * Area3(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
+        Point pointInFrontOfArea3 = new Point(pointInFrontOfArea3Double[0], pointInFrontOfArea3Double[1], pointInFrontOfArea3Double[2]);
         Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
 
         int loopCounterArea3 = 0;
@@ -403,6 +401,10 @@ public class YourService extends KiboRpcService {
         double minDistanceToArea4 = Double.MAX_VALUE;
         double[] bestPointToGoThroughKOZ3 = new double[3];
 
+
+        // Area4の55cm手前
+        double[] pointInFrontOfArea4Double = {10.41, -6.9875, 4.945};
+
         // 0.01刻みでpointInFrontOfKOZ3を探索する　
         // 多分これUtil化したほうがいい
         for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
@@ -419,11 +421,8 @@ public class YourService extends KiboRpcService {
 
                 Log.i(TAG, "point1InFrontOfKOZ3: " + point1InFrontOfKOZ3[0] + ", " + point1InFrontOfKOZ3[1] + ", " + point1InFrontOfKOZ3[2]);
 
-                // Area4(KIZ1)の5cm手前
-                double[] pointInFrontOfArea4 = {10.35, -6.9875, 4.945};
-
                 // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point1InFrontOfKOZ3, pointInFrontOfArea4);
+                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point1InFrontOfKOZ3, pointInFrontOfArea4Double);
 
                 // 最短距離を更新
                 if (distance < minDistanceToArea4) {
@@ -455,9 +454,8 @@ public class YourService extends KiboRpcService {
 
         /**
          * Area4に移動する
-         * Area4(KIZ1)の5cm手前
          */
-        Point pointInFrontOfArea4 = new Point(10.35, -6.9875, 4.945);
+        Point pointInFrontOfArea4 = new Point(pointInFrontOfArea4Double[0], pointInFrontOfArea4Double[1], pointInFrontOfArea4Double[2]);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
