@@ -91,17 +91,26 @@ public class YourService extends KiboRpcService {
         }
 
         // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
-        Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
-        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        // Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
+        // Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
 
-        int loopCounterKiz2ToKiz1 = 0;
-        while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
-            // retry
-            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
-            ++loopCounterKiz2ToKiz1;
-        }
+        // int loopCounterKiz2ToKiz1 = 0;
+        // while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
+        //     // retry
+        //     resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        //     ++loopCounterKiz2ToKiz1;
+        // }
 
         Log.i(TAG, "GetIntoKIZ1!!!!");
+
+        // Flash light on
+        Result resultFlashLightOn = api.flashlightControlFront(1);
+        int loopCounterFlashLight = 0;
+        while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
+            // retry
+            resultFlashLightOn = api.flashlightControlFront(1);
+            ++loopCounterFlashLight;
+        }
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
@@ -124,24 +133,12 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea1!!!!");
 
-        // Flash light on
-        Result resultFlashLightOnAtArea1 = api.flashlightControlFront(1);
-        int loopCounterFlashLightArea1 = 0;
-        while (!resultFlashLightOnAtArea1.hasSucceeded() && loopCounterFlashLightArea1 < LOOP_MAX) {
-            // retry
-            resultFlashLightOnAtArea1 = api.flashlightControlFront(1);
-            ++loopCounterFlashLightArea1;
-        }
-
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
         // TODO imageがnullの場合の対処を書く
 
         api.saveMatImage(image, "area1.png");
-
-        // Flash light off
-        api.flashlightControlFront(0);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -217,23 +214,11 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea2!!!!");
 
-        // Flash light on
-        Result resultFlashLightOnAtArea2 = api.flashlightControlFront(1);
-        int loopCounterFlashLightArea2 = 0;
-        while (!resultFlashLightOnAtArea2.hasSucceeded() && loopCounterFlashLightArea2 < LOOP_MAX) {
-            // retry
-            resultFlashLightOnAtArea2 = api.flashlightControlFront(1);
-            ++loopCounterFlashLightArea2;
-        }
-
         Mat image2 = api.getMatNavCam();
 
         // TODO image2がnullの場合の対処を書く
 
         api.saveMatImage(image2, "area2.png");
-
-        // Flash light off
-        api.flashlightControlFront(0);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -295,23 +280,11 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea3!!!!");
 
-        // Flash light on
-        Result resultFlashLightOnAtArea3 = api.flashlightControlFront(1);
-        int loopCounterFlashLightArea3 = 0;
-        while (!resultFlashLightOnAtArea3.hasSucceeded() && loopCounterFlashLightArea3 < LOOP_MAX) {
-            // retry
-            resultFlashLightOnAtArea3 = api.flashlightControlFront(1);
-            ++loopCounterFlashLightArea3;
-        }
-
         Mat image3 = api.getMatNavCam();
 
         // TODO image3がnullの場合の対処を書く
 
         api.saveMatImage(image3, "area3.png");
-
-        // Flash light off
-        api.flashlightControlFront(0);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -383,23 +356,11 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea4!!!!");
 
-        // Flash light on
-        Result resultFlashLightOnAtArea4 = api.flashlightControlFront(1);
-        int loopCounterFlashLightArea4 = 0;
-        while (!resultFlashLightOnAtArea4.hasSucceeded() && loopCounterFlashLightArea4 < LOOP_MAX) {
-            // retry
-            resultFlashLightOnAtArea4 = api.flashlightControlFront(1);
-            ++loopCounterFlashLightArea4;
-        }
-
         Mat image4 = api.getMatNavCam();
 
         // TODO image4がnullの場合の対処を書く
 
         api.saveMatImage(image4, "area4.png");
-
-        // Flash light off
-        api.flashlightControlFront(0);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -437,6 +398,9 @@ public class YourService extends KiboRpcService {
         /**
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
+
+         // Flash light off
+        api.flashlightControlFront(0);
 
         Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
