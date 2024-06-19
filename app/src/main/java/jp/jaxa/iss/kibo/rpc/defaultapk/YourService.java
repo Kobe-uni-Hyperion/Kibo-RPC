@@ -107,9 +107,7 @@ public class YourService extends KiboRpcService {
         }
         api.saveMatImage(image, "file_name.png");
 
-        // ARタグを検知する
-        //if (!markerIds.empty()) {
-        //Log.i(TAG, "ARtag!!!");
+
         // カメラ行列の取得
         Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
         cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
@@ -148,14 +146,6 @@ public class YourService extends KiboRpcService {
         Log.i(TAG, "corner2: x=" + corner2[0] + ", y=" + corner2[1]);
         Log.i(TAG, "corner3: x=" + corner3[0] + ", y=" + corner3[1]);
 
-
-        // ARコードの4つの座標を台紙の4つの座標に変換する//
-//        points[0] = new org.opencv.core.Point(corner0[0], corner0[1]);
-//        points[1] = new org.opencv.core.Point(corner1[0], corner1[1]);
-//        points[2] = new org.opencv.core.Point(corner2[0], corner2[1]);
-//        points[3] = new org.opencv.core.Point(corner3[0], corner3[1]);
-
-
         points[0] = new org.opencv.core.Point(-103 / 20 * (corner1[0] - corner0[0]) - 5 / 4 * (corner3[0] - corner0[0]) + corner0[0], -103 / 20 * (corner1[1] - corner0[1]) - 5 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
         points[1] = new org.opencv.core.Point(17 / 20 * (corner1[0] - corner0[0]) - 5 / 4 * (corner3[0] - corner0[0]) + corner0[0], 17 / 20 * (corner1[1] - corner0[1]) - 5 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
         points[2] = new org.opencv.core.Point(17 / 20 * (corner1[0] - corner0[0]) + 15 / 4 * (corner3[0] - corner0[0]) + corner0[0], 17 / 20 * (corner1[1] - corner0[1]) + 15 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
@@ -182,7 +172,10 @@ public class YourService extends KiboRpcService {
                 new org.opencv.core.Point(0, height - 1)
         );
         dstPoints.convertTo(dstPoints, CvType.CV_32F);
-        Log.i(TAG, "dstPoints are " + dstPoints);
+
+        for (org.opencv.core.Point point : dstPoints.toArray()) {
+            Log.i(TAG, "dstPoint: x=" + point.x + ", y=" + point.y);
+        }
 
         // 変換前の座標と変換後の座標から透視変換行列(切り抜きたい領域を長方形に変換するための行列)を作る
         transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
@@ -200,6 +193,7 @@ public class YourService extends KiboRpcService {
         Mat clippedImage = Mat.zeros((int) width, (int) height, unDistortedImg.type());
 
         Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
+        Log.i(TAG, "clippedImage.size : " + clippedImage.size());
         api.saveMatImage(clippedImage, "clippedImage.png");
 
         // } else{
