@@ -130,7 +130,7 @@ public class YourService extends KiboRpcService {
         Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         ArrayList<Mat> corners = new ArrayList<>();
         Mat markerIds = new Mat();
-        Aruco.detectMarkers(image, dictionary, corners, markerIds);
+        Aruco.detectMarkers(unDistortedImg, dictionary, corners, markerIds);
 
         Mat corner = corners.get(0); // 最初のARマーカーのコーナー4点(複数ARマーカーがある場合、最初に検知したもの)
         final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
@@ -150,7 +150,7 @@ public class YourService extends KiboRpcService {
 
 
         // ARコードの4つの座標を台紙の4つの座標に変換する//
-        //points[0] = new org.opencv.core.Point(corner0[0], corner0[1]);
+//        points[0] = new org.opencv.core.Point(corner0[0], corner0[1]);
 //        points[1] = new org.opencv.core.Point(corner1[0], corner1[1]);
 //        points[2] = new org.opencv.core.Point(corner2[0], corner2[1]);
 //        points[3] = new org.opencv.core.Point(corner3[0], corner3[1]);
@@ -195,7 +195,7 @@ public class YourService extends KiboRpcService {
             }
         }
 
-        Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
+        Mat clippedImage = Mat.zeros((int) width, (int) height, unDistortedImg.type());
 
         Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
         api.saveMatImage(clippedImage, "clippedImage.png");
