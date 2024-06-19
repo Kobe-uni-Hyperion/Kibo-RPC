@@ -91,17 +91,26 @@ public class YourService extends KiboRpcService {
         }
 
         // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
-        Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
-        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        // Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
+        // Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
 
-        int loopCounterKiz2ToKiz1 = 0;
-        while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
-            // retry
-            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
-            ++loopCounterKiz2ToKiz1;
-        }
+        // int loopCounterKiz2ToKiz1 = 0;
+        // while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
+        //     // retry
+        //     resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        //     ++loopCounterKiz2ToKiz1;
+        // }
 
         Log.i(TAG, "GetIntoKIZ1!!!!");
+
+        // Flash light on
+        Result resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+        int loopCounterFlashLight = 0;
+        while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
+            // retry
+            resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+            ++loopCounterFlashLight;
+        }
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
@@ -110,7 +119,6 @@ public class YourService extends KiboRpcService {
         // y座標をArea1に近づける
         // Area1の60cm手前に移動する
         Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
-        double[] pointInFrontOfArea1Double = {10.95, -9.98, 4.595};
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -390,6 +398,9 @@ public class YourService extends KiboRpcService {
         /**
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
+
+         // Flash light off
+        api.flashlightControlFront(0);
 
         Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
