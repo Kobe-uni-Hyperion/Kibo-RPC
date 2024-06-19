@@ -11,7 +11,6 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import gov.nasa.arc.astrobee.Kinematics;
 import gov.nasa.arc.astrobee.Result;
@@ -135,61 +134,46 @@ public class YourService extends KiboRpcService {
 
         Mat corner = corners.get(0); // 最初のARマーカーのコーナー4点(複数ARマーカーがある場合、最初に検知したもの)
         final org.opencv.core.Point[] points = new org.opencv.core.Point[4];
+        // point[0]:ARコードの左上の座標, point[1]:右上の座標, point[2]:右下の座標, point[3]:左下の座標
+//        for (int i = 0; i < 4; i++) {
+//            points[i] = new org.opencv.core.Point(corner.get(0, i));
+//        }
+        double[] corner0 = corner.get(0, 0);
+        double[] corner1 = corner.get(0, 1);
+        double[] corner2 = corner.get(0, 2);
+        double[] corner3 = corner.get(0, 3);
+
+        // ARコードの4つの座標を台紙の4つの座標に変換する
+
+        points[0] = new org.opencv.core.Point(-83 / 20 * (corner1[0] - corner0[0]) - 1 / 4 * (corner3[0] - corner0[0]) + corner0[0], -83 / 20 * (corner1[1] - corner0[1]) - 1 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[1] = new org.opencv.core.Point(-3 / 20 * (corner1[0] - corner0[0]) - 1 / 4 * (corner3[0] - corner0[0]) + corner0[0], -3 / 20 * (corner1[1] - corner0[1]) - 1 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[2] = new org.opencv.core.Point(-3 / 20 * (corner1[0] - corner0[0]) + 11 / 4 * (corner3[0] - corner0[0]) + corner0[0], -3 / 20 * (corner1[1] - corner0[1]) + 11 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
+        points[3] = new org.opencv.core.Point(-83 / 20 * (corner1[0] - corner0[0]) + 11 / 4 * (corner3[0] - corner0[0]) + corner0[0], -83 / 20 * (corner1[1] - corner0[1]) + 11 / 4 * (corner3[1] - corner0[1]) + corner0[1]);
 
         for (int i = 0; i < 4; i++) {
-            points[i] = new org.opencv.core.Point(corner.get(0, i));
-            Log.i(TAG, "points[" + i + "]" + points[i]);
+            Log.i(TAG, "points[" + i + "] : " + points[i]);
         }
 
-
-        // y座標が昇順になるように座標4点をソート
-        Arrays.sort(points, (p1, p2) -> Double.compare(p1.y, p2.y));
-        org.opencv.core.Point leftTop, rightTop, leftBottom, rightBottom;
-
-        // 四角形の上二つの点の左右を決定
-        if (points[0].x < points[1].x) {
-            leftTop = points[0];
-            rightTop = points[1];
-        } else {
-            leftTop = points[1];
-            rightTop = points[0];
-        }
-        // 四角形の下二つの点の左右を決定
-        if (points[2].x < points[3].x) {
-            leftBottom = points[2];
-            rightBottom = points[3];
-        } else {
-            leftBottom = points[3];
-            rightBottom = points[2];
-        }
-        Log.i(TAG, "leftTop, rightTop, leftBottom, rightBottom are " + leftTop + rightTop + leftBottom + rightBottom);
-
-        double width = Math.sqrt(Math.pow(leftTop.x - rightTop.x, 2) + Math.pow(leftTop.y - rightTop.y, 2));
-        double height = Math.sqrt(Math.pow(leftTop.x - leftBottom.x, 2) + Math.pow(leftTop.y - leftBottom.y, 2));
-
-        Log.i(TAG, "width is " + width + "height is " + height);
-        // ここでコーナーの順序を調整
-        points[0] = leftTop;
-        points[1] = rightTop;
-        points[2] = rightBottom;
-        points[3] = leftBottom;
+        double width = Math.sqrt(Math.pow(points[0].x - points[1].x, 2) + Math.pow(points[0].y - points[1].y, 2));
+        double height = Math.sqrt(Math.pow(points[0].x - points[3].x, 2) + Math.pow(points[0].y - points[3].y, 2));
 
         Mat transformMatrix;
-        {
-            MatOfPoint2f srcPoints = new MatOfPoint2f(points);
-            srcPoints.convertTo(srcPoints, CvType.CV_32F);
 
-            MatOfPoint2f dstPoints = new MatOfPoint2f(
-                    new org.opencv.core.Point(0, 0),
-                    new org.opencv.core.Point(width - 1, 0),
-                    new org.opencv.core.Point(width - 1, height - 1),
-                    new org.opencv.core.Point(0, height - 1)
-            );
-            dstPoints.convertTo(dstPoints, CvType.CV_32F);
+        MatOfPoint2f srcPoints = new MatOfPoint2f(points);
+        srcPoints.convertTo(srcPoints, CvType.CV_32F);
 
-            // 変換前の座標と変換後の座標から透視変換行列(切り抜きたい領域を長方形に変換するための行列)を作る
-            transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
-        }
+        MatOfPoint2f dstPoints = new MatOfPoint2f(
+                new org.opencv.core.Point(0, 0),
+                new org.opencv.core.Point(width - 1, 0),
+                new org.opencv.core.Point(width - 1, height - 1),
+                new org.opencv.core.Point(0, height - 1)
+        );
+        dstPoints.convertTo(dstPoints, CvType.CV_32F);
+        Log.i(TAG, "dstPoints are " + dstPoints);
+
+        // 変換前の座標と変換後の座標から透視変換行列(切り抜きたい領域を長方形に変換するための行列)を作る
+        transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
+
 
         Log.i(TAG, "transformMatrix is" + transformMatrix);
         // transformMatrix の値をログに出力
@@ -201,20 +185,9 @@ public class YourService extends KiboRpcService {
         }
 
         Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
-        //Mat clippedImage = new Mat((int) width, (int) height, unDistortedImg.type());
-        //Mat clippedImage = new Mat();
 
         Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
         api.saveMatImage(clippedImage, "clippedImage.png");
-
-
-        // unDistortedImg切り抜き
-        //Mat clippedImage = ImageUtil.clipAR(unDistortedImg);
-        //if (clippedImage != null && !clippedImage.empty()) {
-        //  api.saveMatImage(clippedImage, "clippedImage.png");
-        //} else {
-        //  Log.i(TAG, "clippedImage = null or clippedImage is empty");
-        //}
 
         // } else{
         //     Log.i(TAG, "No AR markers detected");
