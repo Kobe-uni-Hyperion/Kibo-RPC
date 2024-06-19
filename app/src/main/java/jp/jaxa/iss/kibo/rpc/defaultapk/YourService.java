@@ -110,6 +110,7 @@ public class YourService extends KiboRpcService {
         // y座標をArea1に近づける
         // Area1の60cm手前に移動する
         Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
+        double[] pointInFrontOfArea1Double = {10.95, -9.98, 4.595};
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -127,7 +128,7 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
-        // imageがnullの場合の対処を書く
+        // TODO imageがnullの場合の対処を書く
 
         api.saveMatImage(image, "area1.png");
 
@@ -158,7 +159,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -171,46 +172,11 @@ public class YourService extends KiboRpcService {
         /**
          * point2に移動して画像認識するコード
          */
-
-        // 現在の座標を取得
-        Kinematics kinematicsAfterArea1 = api.getRobotKinematics();
-        Point pointAfterArea1 = kinematicsAfterArea1.getPosition();
-
-        double minDistanceToArea2 = Double.MAX_VALUE;
-        double[] bestPointToGoThroughKOZ1 = new double[3];
-
-        // Area2(KIZ1)の5cm手前
-        double[] pointInFrontOfArea2Double = {10.925, -8.875, 4.37};
-
-        // 0.01刻みでpointInFrontOfKOZ1を探索する　
-        // 多分これUtil化したほうがいい
-        for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
-            for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
-                // KOZを避けているか確認
-                if (isInKOZ(x, z, koz1Position1) || isInKOZ(x, z, koz1Position2)) {
-                    continue;
-                }
-
-                // KOZ1をの通過点
-                // -9.7は、-9.5から0.2下がった値(20cm余分に取っている)
-                double[] point1InFrontOfKOZ1 = {x, -9.475, z};
-
-                // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea1.getX(), pointAfterArea1.getY(), pointAfterArea1.getZ()}, point1InFrontOfKOZ1) + calculateDistance(point1InFrontOfKOZ1, pointInFrontOfArea2Double);
-
-                // 最短距離を更新
-                if (distance < minDistanceToArea2) {
-                    minDistanceToArea2 = distance;
-                    bestPointToGoThroughKOZ1 = point1InFrontOfKOZ1;
-                }
-            }
-        }
-
         /**
          * KOZ1の前まで行く
          */
-        // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ1 = new Point(bestPointToGoThroughKOZ1[0], bestPointToGoThroughKOZ1[1], bestPointToGoThroughKOZ1[2]);
+        // Area2(KIZ1)の5cm手前
+        Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
         // y軸正方向を軸として、-90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
@@ -228,7 +194,7 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        Point pointInFrontOfArea2 = new Point(pointInFrontOfArea2Double[0], pointInFrontOfArea2Double[1], pointInFrontOfArea2Double[2]);
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -242,7 +208,7 @@ public class YourService extends KiboRpcService {
 
         Mat image2 = api.getMatNavCam();
 
-        // image2がnullの場合の対処を書く
+        // TODO image2がnullの場合の対処を書く
 
         api.saveMatImage(image2, "area2.png");
 
@@ -273,7 +239,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -284,67 +250,17 @@ public class YourService extends KiboRpcService {
          * point3に移動して画像認識するコード
          */
 
-
         // **********今回のミッションではKOZ2の前で止まる必要はなく、そのままPoint3いけばいい**********
         // **********したがって、KOZ2の前で止まるコードはコメントアウトしている**********
 
-        // 現在の座標を取得
-        // Kinematics kinematicsAfterArea2 = api.getRobotKinematics();
-        // Point pointAfterArea2 = kinematicsAfterArea2.getPosition();
-
-        // double minDistanceToArea3 = Double.MAX_VALUE;
-        // double[] bestPointToGoThroughKOZ2 = new double[3];
-
-        // Area3(KIZ1)の5cm手前
-        double[] pointInFrontOfArea3Double = {10.925, -7.925, 4.37};
-
-        // 0.01刻みでpointInFrontOfKOZ2を探索する　
-        // 多分これUtil化したほうがいい
-
-        // for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
-        //     for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
-        //         // KOZを避けているか確認
-        //         if (isInKOZ(x, z, koz2Position1) || isInKOZ(x, z, koz2Position2)) {
-        //             continue;
-        //         }
-
-        //         // KOZ2の通過点
-        //         double[] point1InFrontOfKOZ2 = {x, -8.475, z};
-
-        //         // 距離の計算
-        //         double distance = calculateDistance(new double[]{pointAfterArea2.getX(), pointAfterArea2.getY(), pointAfterArea2.getZ()}, point1InFrontOfKOZ2) + calculateDistance(point1InFrontOfKOZ2, pointInFrontOfArea3Double);
-
-        //         // 最短距離を更新
-        //         if (distance < minDistanceToArea3) {
-        //             minDistanceToArea3 = distance;
-        //             bestPointToGoThroughKOZ2 = point1InFrontOfKOZ2;
-        //         }
-        //     }
-        // }
-
         /**
-         * KOZ2の前まで行く
+         * KOZ2を通過し、Area3に移動する
          */
-        // 得られた最短距離の座標に移動
-        // Point point1ToGoThroughKOZ2 = new Point(bestPointToGoThroughKOZ2[0], bestPointToGoThroughKOZ2[1], bestPointToGoThroughKOZ2[2]);
+        // Area3(KIZ1)の5cm手前
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
-        // Result result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea3, true);
-
-        // int loopCounter1KOZ2 = 0;
-        // while (!result1MoveToKOZ2.hasSucceeded() && loopCounter1KOZ2 < 5) {
-        //     // retry
-        //     result1MoveToKOZ2 = api.moveTo(point1ToGoThroughKOZ2, quaternionInFrontOfArea3, true);
-        //     ++loopCounter1KOZ2;
-        // }
-
-        // Log.i(TAG, "InFrontOfKOZ2!!!!");
-
-        /**
-         * Area3に移動する
-         */
-        Point pointInFrontOfArea3 = new Point(pointInFrontOfArea3Double[0], pointInFrontOfArea3Double[1], pointInFrontOfArea3Double[2]);
         Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
 
         int loopCounterArea3 = 0;
@@ -358,7 +274,7 @@ public class YourService extends KiboRpcService {
 
         Mat image3 = api.getMatNavCam();
 
-        // image3がnullの場合の対処を書く
+        // TODO image3がnullの場合の対処を書く
 
         api.saveMatImage(image3, "area3.png");
 
@@ -389,7 +305,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        //  TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -398,51 +314,10 @@ public class YourService extends KiboRpcService {
         /**
          * point4に移動して画像認識するコード
          */
-
-        // 現在の座標を取得
-        Kinematics kinematicsAfterArea3 = api.getRobotKinematics();
-        Point pointAfterArea3 = kinematicsAfterArea3.getPosition();
-
-        double minDistanceToArea4 = Double.MAX_VALUE;
-        double[] bestPointToGoThroughKOZ3 = new double[3];
-
-
-        // Area4の60cm手前
-        double[] pointInFrontOfArea4Double = {10.46, -6.9875, 4.945};
-
-        // 0.01刻みでpointInFrontOfKOZ3を探索する　
-        // 多分これUtil化したほうがいい
-        for (double x = kiz1XMin + 0.2; x <= kiz1XMax - 0.2 ; x += 0.01) {
-            for(double z = kiz1ZMin + 0.2; z <= kiz1ZMax - 0.2; z += 0.01){
-                // KOZを避けているか確認
-                if (isInKOZ(x, z, koz3Position1) || isInKOZ(x, z, koz3Position2)) {
-                    continue;
-                }
-
-                Log.i(TAG, "x: " + x + ", z: " + z);
-
-                // KOZ3の通過点
-                double[] point1InFrontOfKOZ3 = {x, -7.375, z};
-
-                Log.i(TAG, "point1InFrontOfKOZ3: " + point1InFrontOfKOZ3[0] + ", " + point1InFrontOfKOZ3[1] + ", " + point1InFrontOfKOZ3[2]);
-
-                // 距離の計算
-                double distance = calculateDistance(new double[]{pointAfterArea3.getX(), pointAfterArea3.getY(), pointAfterArea3.getZ()}, point1InFrontOfKOZ3) + calculateDistance(point1InFrontOfKOZ3, pointInFrontOfArea4Double);
-
-                // 最短距離を更新
-                if (distance < minDistanceToArea4) {
-                    minDistanceToArea4 = distance;
-                    bestPointToGoThroughKOZ3 = point1InFrontOfKOZ3;
-                    Log.i(TAG, "bestPointToGoThroughKOZ3: " + bestPointToGoThroughKOZ3[0] + ", " + bestPointToGoThroughKOZ3[1] + ", " + bestPointToGoThroughKOZ3[2]);
-                }
-            }
-        }
-
         /**
          * KOZ3の前まで行く
          */
-        // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ3 = new Point(bestPointToGoThroughKOZ3[0], bestPointToGoThroughKOZ3[1], bestPointToGoThroughKOZ3[2]);
+        Point point1ToGoThroughKOZ3 = new Point(10.64, -7.375, 4.71);
         // z軸正方向を軸として、180度回転
         // 視野: x軸負方向へ変わる
         Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(0, 0, 1, (float) (Math.PI));
@@ -460,7 +335,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        Point pointInFrontOfArea4 = new Point(pointInFrontOfArea4Double[0], pointInFrontOfArea4Double[1], pointInFrontOfArea4Double[2]);
+        // Area4の60cm手前
+        Point pointInFrontOfArea4 = new Point(10.46, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -474,7 +350,7 @@ public class YourService extends KiboRpcService {
 
         Mat image4 = api.getMatNavCam();
 
-        // image4がnullの場合の対処を書く
+        // TODO image4がnullの場合の対処を書く
 
         api.saveMatImage(image4, "area4.png");
 
@@ -505,7 +381,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -573,7 +449,7 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // 画像認識
+        // TODO 画像認識
 
         /* ********************************************************** */
         /* Write your code to recognize which item the astronaut has. */
@@ -590,6 +466,76 @@ public class YourService extends KiboRpcService {
          * Write your code to move Astrobee to the location of the target item (what the
          * astronaut is looking for)
          */
+
+        int targetItemID;
+        // 暫定で1にしている
+        targetItemID = 1;
+
+        /**
+         * KOZ3の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ3WhenReturn = new Point(10.65, -7.375, 4.72);
+        Result result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ3WhenReturn = 0;
+        while (!result1MoveToKOZ3WhenReturn.hasSucceeded() && loopCounter1KOZ3WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ3WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ3WhenReturn!!!!");
+
+        /**
+         * KOZ2の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ2WhenReturn = new Point(10.9, -8.475, 4.72);
+        Result result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ2WhenReturn = 0;
+        while (!result1MoveToKOZ2WhenReturn.hasSucceeded() && loopCounter1KOZ2WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ2WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ2WhenReturn!!!!");
+
+        /**
+         * KOZ1の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ1WhenReturn = new Point(11.1, -9.475, 5.22);
+        Result result1MoveToKOZ1WhenReturn = api.moveTo(point1ToGoThroughKOZ1WhenReturn, quaternion1, true);
+
+        int loopCounter1KOZ1WhenReturn = 0;
+        while (!result1MoveToKOZ1WhenReturn.hasSucceeded() && loopCounter1KOZ1WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ1WhenReturn = api.moveTo(point1ToGoThroughKOZ1WhenReturn, quaternion1, true);
+            ++loopCounter1KOZ1WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ1WhenReturn!!!!");
+
+        /**
+         * Area1に移動する
+         */
+        resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
+
+        int loopCounterArea1WhenReturn = 0;
+        while (!resultMoveToArea1.hasSucceeded() && loopCounterArea1WhenReturn < 5) {
+            // retry
+            resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
+            ++loopCounterArea1WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfArea1WhenReturn!!!!");
+
+        Mat imageAfterReturn = api.getMatNavCam();
+        api.saveMatImage(imageAfterReturn, "afterReturn.png");
+
         /*
          * *****************************************************************************
          * **************************
