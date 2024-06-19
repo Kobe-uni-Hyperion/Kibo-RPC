@@ -36,10 +36,40 @@ import java.io.InputStream;
 public class YourService extends KiboRpcService {
 
     private final String TAG = this.getClass().getSimpleName();
+
+    public static boolean isInKOZ(double x, double z, double[][] koz){
+        double largeX = Math.max(koz[0][0], koz[1][0]);
+        double smallX = Math.min(koz[0][0], koz[1][0]);
+        double largeZ = Math.max(koz[0][2], koz[1][2]);
+        double smallZ = Math.min(koz[0][2], koz[1][2]);
+
+        return smallX <= x && x <= largeX && smallZ <= z && z <= largeZ;
+    }
+
+    public static double calculateDistance(double[] point1, double[] point2) {
+        return Math.sqrt(Math.pow(point1[0] - point2[0], 2)
+                       + Math.pow(point1[1] - point2[1], 2)
+                       + Math.pow(point1[2] - point2[2], 2));
+    }
     private Detector detector;
 
     @Override
     protected void runPlan1() {
+        double kiz1XMin = 10.3;
+        double kiz1XMax = 11.55;
+        double kiz1ZMin = 4.32;
+        double kiz1ZMax = 5.57;
+
+        // 20cm余分に取っている
+        double[][] koz1Position1 = {{10.67, -9.5, 4.07}, {11.8, -9.45, 5.17}};
+        double[][] koz1Position2 = {{10.05, -9.5, 4.77}, {11.07, -9.45, 5.82}};
+
+        double[][] koz2Position1 = {{10.67, -8.5, 4.77}, {11.8, -8.45, 5.82}};
+        double[][] koz2Position2 = {{10.05, -8.5, 4.07}, {10.9, -8.45, 5.17}};
+
+        double[][] koz3Position1 = {{10.67, -7.4, 4.07}, {11.8, -7.35, 5.17}};
+        double[][] koz3Position2 = {{10.05, -7.4, 4.77}, {11.07, -7.35, 5.82}};
+
         double kiz1XMin = 10.3;
         double kiz1XMax = 11.55;
         double kiz1ZMin = 4.32;
@@ -96,17 +126,26 @@ public class YourService extends KiboRpcService {
         }
 
         // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
-        Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
-        Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        // Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
+        // Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
 
-        int loopCounterKiz2ToKiz1 = 0;
-        while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
-            // retry
-            resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
-            ++loopCounterKiz2ToKiz1;
-        }
+        // int loopCounterKiz2ToKiz1 = 0;
+        // while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
+        //     // retry
+        //     resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
+        //     ++loopCounterKiz2ToKiz1;
+        // }
 
         Log.i(TAG, "GetIntoKIZ1!!!!");
+
+        // Flash light on
+        Result resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+        int loopCounterFlashLight = 0;
+        while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
+            // retry
+            resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+            ++loopCounterFlashLight;
+        }
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
@@ -115,7 +154,6 @@ public class YourService extends KiboRpcService {
         // y座標をArea1に近づける
         // Area1の60cm手前に移動する
         Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
-        double[] pointInFrontOfArea1Double = {10.95, -9.98, 4.595};
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -133,8 +171,9 @@ public class YourService extends KiboRpcService {
         // Get a camera image. NavCam → 画像処理用のカメラ
         Mat image = api.getMatNavCam();
 
-        // TODO imageがnullの場合の対処を書く
+        // TODO TODO imageがnullの場合の対処を書く
 
+        api.saveMatImage(image, "area1.png");
         api.saveMatImage(image, "area1.png");
 
         String area1_item_name = "beaker";
@@ -186,11 +225,15 @@ public class YourService extends KiboRpcService {
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
 
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
+        Mat unDistortedImg = new Mat();
+        Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
+
+        api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        // TODO 画像認識
+        // TODO TODO 画像認識
 
         /* **************************************************** */
         /* Let's move to the each area and recognize the items. */
@@ -584,6 +627,50 @@ public class YourService extends KiboRpcService {
             targetItemID = 1;
         }
 
+        Log.i(TAG, "InFrontOfAstronaut!!!!");
+
+        Mat imageAstronaut = api.getMatNavCam();
+
+        // imageAstronautがnullの場合の対処を書く
+
+        api.saveMatImage(imageAstronaut, "astronaut.png");
+
+        // ARタグを検知する
+        Dictionary dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        List<Mat> cornersAstronaut = new ArrayList<>();
+        Mat markerIdsAstronaut = new Mat();
+        Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
+
+        int loopCounterAstronautImage = 0;
+        while (markerIdsAstronaut.empty() && loopCounterAstronautImage < 10) {
+            imageAstronaut = api.getMatNavCam();
+            api.saveMatImage(imageAstronaut, "astronaut.png");
+            dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+            cornersAstronaut = new ArrayList<>();
+            markerIdsAstronaut = new Mat();
+            Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
+            loopCounterAstronautImage++;
+        }
+
+        // カメラ行列の取得
+        Mat cameraMatrixAstronaut = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrixAstronaut.put(0, 0, api.getNavCamIntrinsics()[0]);
+        // 歪み係数の取得
+        Mat cameraCoefficientsAstronaut = new Mat(1, 5, CvType.CV_64F);
+        cameraCoefficientsAstronaut.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficientsAstronaut.convertTo(cameraCoefficientsAstronaut, CvType.CV_64F);
+
+        // 歪みのないimage
+        Mat unDistortedImgAstronaut = new Mat();
+        Calib3d.undistort(imageAstronaut, unDistortedImgAstronaut, cameraMatrixAstronaut, cameraCoefficientsAstronaut);
+
+        api.saveMatImage(unDistortedImgAstronaut, "unDistortedImgOfAreaAstronaut.png");
+
+        // ARタグからカメラまでの距離と傾きを求めて、
+        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+
+        // TODO 画像認識
+
         /* ********************************************************** */
         /* Write your code to recognize which item the astronaut has. */
         /* ********************************************************** */
@@ -599,6 +686,10 @@ public class YourService extends KiboRpcService {
          * Write your code to move Astrobee to the location of the target item (what the
          * astronaut is looking for)
          */
+
+        int targetItemID;
+        // 暫定で1にしている
+        targetItemID = 1;
 
         /**
          * KOZ3の前まで行く
