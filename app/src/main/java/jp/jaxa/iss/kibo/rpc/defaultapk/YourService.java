@@ -104,11 +104,11 @@ public class YourService extends KiboRpcService {
         Log.i(TAG, "GetIntoKIZ1!!!!");
 
         // Flash light on
-        Result resultFlashLightOn = api.flashlightControlFront(1);
+        Result resultFlashLightOn = api.flashlightControlFront((float) 0.4);
         int loopCounterFlashLight = 0;
         while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
             // retry
-            resultFlashLightOn = api.flashlightControlFront(1);
+            resultFlashLightOn = api.flashlightControlFront((float) 0.4);
             ++loopCounterFlashLight;
         }
 
