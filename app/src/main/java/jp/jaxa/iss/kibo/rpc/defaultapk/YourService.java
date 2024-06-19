@@ -407,9 +407,9 @@ public class YourService extends KiboRpcService {
          * KOZ3の前まで行く
          */
         Point point1ToGoThroughKOZ3 = new Point(10.64, -7.375, 4.71);
-        // z軸正方向を軸として、180度回転
-        // 視野: x軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(1, 0, 0, (float) (Math.PI));
+        // x軸正方向を軸として、90度回転
+        // Dockカメラで撮る！！
+        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(1, 0, 0, (float) ((1/2) * Math.PI));
         Result result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea4, true);
 
         int loopCounter1KOZ3 = 0;
