@@ -70,21 +70,6 @@ public class YourService extends KiboRpcService {
         double[][] koz3Position1 = {{10.67, -7.4, 4.07}, {11.8, -7.35, 5.17}};
         double[][] koz3Position2 = {{10.05, -7.4, 4.77}, {11.07, -7.35, 5.82}};
 
-        double kiz1XMin = 10.3;
-        double kiz1XMax = 11.55;
-        double kiz1ZMin = 4.32;
-        double kiz1ZMax = 5.57;
-
-        // 20cm余分に取っている
-        double[][] koz1Position1 = {{10.67, -9.5, 4.07}, {11.8, -9.45, 5.17}};
-        double[][] koz1Position2 = {{10.05, -9.5, 4.77}, {11.07, -9.45, 5.82}};
-
-        double[][] koz2Position1 = {{10.67, -8.5, 4.77}, {11.8, -8.45, 5.82}};
-        double[][] koz2Position2 = {{10.05, -8.5, 4.07}, {10.9, -8.45, 5.17}};
-
-        double[][] koz3Position1 = {{10.67, -7.4, 4.07}, {11.8, -7.35, 5.17}};
-        double[][] koz3Position2 = {{10.05, -7.4, 4.77}, {11.07, -7.35, 5.82}};
-
         // Detectorのセットアップ
         try {
             detector = new Detector(getApplicationContext(), "model_v2.tflite", "labels.txt");
@@ -221,10 +206,6 @@ public class YourService extends KiboRpcService {
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
 
         // 歪みのないimage
-        Mat unDistortedImg = new Mat();
-        Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
-
-        api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
         Mat unDistortedImg = new Mat();
         Calib3d.undistort(image, unDistortedImg, cameraMatrix, cameraCoefficients);
 
@@ -629,42 +610,12 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfAstronaut!!!!");
 
-        Mat imageAstronaut = api.getMatNavCam();
 
         // imageAstronautがnullの場合の対処を書く
 
         api.saveMatImage(imageAstronaut, "astronaut.png");
 
-        // ARタグを検知する
-        Dictionary dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
-        List<Mat> cornersAstronaut = new ArrayList<>();
-        Mat markerIdsAstronaut = new Mat();
-        Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
 
-        int loopCounterAstronautImage = 0;
-        while (markerIdsAstronaut.empty() && loopCounterAstronautImage < 10) {
-            imageAstronaut = api.getMatNavCam();
-            api.saveMatImage(imageAstronaut, "astronaut.png");
-            dictionaryAstronaut = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
-            cornersAstronaut = new ArrayList<>();
-            markerIdsAstronaut = new Mat();
-            Aruco.detectMarkers(imageAstronaut, dictionaryAstronaut, cornersAstronaut, markerIdsAstronaut);
-            loopCounterAstronautImage++;
-        }
-
-        // カメラ行列の取得
-        Mat cameraMatrixAstronaut = new Mat(3, 3, CvType.CV_64F);
-        cameraMatrixAstronaut.put(0, 0, api.getNavCamIntrinsics()[0]);
-        // 歪み係数の取得
-        Mat cameraCoefficientsAstronaut = new Mat(1, 5, CvType.CV_64F);
-        cameraCoefficientsAstronaut.put(0, 0, api.getNavCamIntrinsics()[1]);
-        cameraCoefficientsAstronaut.convertTo(cameraCoefficientsAstronaut, CvType.CV_64F);
-
-        // 歪みのないimage
-        Mat unDistortedImgAstronaut = new Mat();
-        Calib3d.undistort(imageAstronaut, unDistortedImgAstronaut, cameraMatrixAstronaut, cameraCoefficientsAstronaut);
-
-        api.saveMatImage(unDistortedImgAstronaut, "unDistortedImgOfAreaAstronaut.png");
 
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
@@ -687,9 +638,6 @@ public class YourService extends KiboRpcService {
          * astronaut is looking for)
          */
 
-        int targetItemID;
-        // 暫定で1にしている
-        targetItemID = 1;
 
         /**
          * KOZ3の前まで行く
