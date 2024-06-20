@@ -71,7 +71,7 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector_white = new Detector(getApplicationContext(), "white.tflite", "labels.txt");
+            detector_white = new Detector(getApplicationContext(), "white2.tflite", "labels.txt");
             detector_white.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
@@ -79,7 +79,7 @@ public class YourService extends KiboRpcService {
         }
 
         try {
-            detector_back = new Detector(getApplicationContext(), "model_v3.tflite", "labels.txt");
+            detector_back = new Detector(getApplicationContext(), "model_v4.tflite", "labels.txt");
             detector_back.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
