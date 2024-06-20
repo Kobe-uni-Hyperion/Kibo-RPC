@@ -108,17 +108,6 @@ public class YourService extends KiboRpcService {
             ++loopCounterKiz2ToKiz1FirstMove;
         }
 
-        // 続いて、KIZ1とKIZ2の重なった部分のほぼ中心に移動する。y座標はそのまま、x座標とz座標はKIZ1とKIZ2の重なった部分の中心.
-        // Point kiz2ToKiz1 = new Point(10.4, -9.806, 4.56);
-        // Result resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
-
-        // int loopCounterKiz2ToKiz1 = 0;
-        // while (!resultMoveToEntranceOfKiz1.hasSucceeded() && loopCounterKiz2ToKiz1 < 5) {
-        //     // retry
-        //     resultMoveToEntranceOfKiz1 = api.moveTo(kiz2ToKiz1, quaternion1, true);
-        //     ++loopCounterKiz2ToKiz1;
-        // }
-
         Log.i(TAG, "GetIntoKIZ1!!!!");
 
         // Flash light on
@@ -132,11 +121,12 @@ public class YourService extends KiboRpcService {
 
         // Area1の中心座標
         // Area1の中心は(10.95,−10.58,5.195)
+        // NavCamはそこから(-0.0422, 0, -0.0826)
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        // Area1の60cm手前に移動する
-        Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
+        // Area1の(0.525 + 0.1177)m手前に移動する
+        Point area1FirstViewPoint = new Point((10.95 + 0.0422), (-10.58 + 0.525 + 0.1177), (5.195 + 0.0826));
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -230,11 +220,13 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1の前まで行く
          */
-        // Area2(KIZ1)の5cm手前
         Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
-        // y軸正方向を軸として、-90度回転
-        // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        // y軸正方向を軸として、90度回転
+        // z軸正方向を軸として、90度回転
+        // 視野: z軸負方向へ変わる、90度曲がって見える（はず）
+        Quaternion quaternionArea2Y = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Quaternion quaternionArea2Z = QuaternionUtil.rotate(0, 0, 1, (float) (0.5 * Math.PI));
+        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.product(quaternionArea2Z, quaternionArea2Y);
         Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternionInFrontOfArea2, true);
 
         int loopCounter1KOZ1 = 0;
@@ -249,7 +241,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
+        // Area2の(0.646 + 0.1177)m手前
+        Point pointInFrontOfArea2 = new Point((10.925 - 0.0422), (-8.875 + 0.0826), (3.76203 + 0.646 + 0.1177));
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -336,11 +329,11 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ2を通過し、Area3に移動する
          */
-        // Area3(KIZ1)の5cm手前
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
+        // Area3の(0.699 + 0.1177)m手前
+        Point pointInFrontOfArea3 = new Point((10.925 - 0.0422), (-7.925 + 0.0826), (3.76203 + 0.699 + 0.1177));
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Quaternion quaternionInFrontOfArea3 = quaternionInFrontOfArea2;
         Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
 
         int loopCounterArea3 = 0;
@@ -423,6 +416,20 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ3の前まで行く
          */
+
+
+        // Flash Front light off
+        api.flashlightControlFront(0);
+
+         // Flash light on
+        Result resultBackFlashLightOn = api.flashlightControlBack((float) 0.3);
+        int loopCounterBackFlashLight = 0;
+        while (!resultBackFlashLightOn.hasSucceeded() && loopCounterBackFlashLight < 5) {
+            // retry
+            resultBackFlashLightOn = api.flashlightControlBack((float) 0.3);
+            ++loopCounterBackFlashLight;
+        }
+
         Point point1ToGoThroughKOZ3 = new Point(10.64, -7.375, 4.71);
         // x軸正方向を軸として、90度回転
         // Dockカメラで撮る！！
@@ -441,8 +448,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の60cm手前
-        Point pointInFrontOfArea4 = new Point(10.46, -6.9875, 4.945);
+        // Area4の(0.699 + 0.1061)m手前
+        Point pointInFrontOfArea4 = new Point((9.866984 + 0.699 + 0.1061), (-6.9875 + 0.054), (4.945 + 0.0064));
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -527,8 +534,8 @@ public class YourService extends KiboRpcService {
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
 
-        // Flash light off
-        api.flashlightControlFront(0);
+        // Flash Back light off
+        api.flashlightControlBack(0);
 
         Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
