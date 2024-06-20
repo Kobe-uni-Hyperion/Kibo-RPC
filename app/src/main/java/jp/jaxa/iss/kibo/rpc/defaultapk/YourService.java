@@ -189,16 +189,19 @@ public class YourService extends KiboRpcService {
 
         if (unDistortedImg != null) {
             Bitmap bitmapImage = matToBitmap(unDistortedImg);
+
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area1_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area1_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area1_item_name.equals(entry.getKey()))
+                    {
                         area1_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
                     }
                 }
             } else {
@@ -293,16 +296,19 @@ public class YourService extends KiboRpcService {
 
         if (unDistortedImg2 != null) {
             Bitmap bitmapImage = matToBitmap(unDistortedImg2);
+
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area2_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area2_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area2_item_name.equals(entry.getKey()))
+                    {
                         area2_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
                     }
                 }
             } else {
@@ -379,16 +385,19 @@ public class YourService extends KiboRpcService {
 
         if (unDistortedImg3 != null) {
             Bitmap bitmapImage = matToBitmap(unDistortedImg3);
+
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area3_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area3_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area3_item_name.equals(entry.getKey()))
+                    {
                         area3_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
                     }
                 }
             } else {
@@ -473,16 +482,19 @@ public class YourService extends KiboRpcService {
 
         if (unDistortedImg4 != null) {
             Bitmap bitmapImage = matToBitmap(unDistortedImg4);
+
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area4_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area4_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area4_item_name.equals(entry.getKey()))
+                    {
                         area4_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
                     }
                 }
             } else {
@@ -573,16 +585,19 @@ public class YourService extends KiboRpcService {
 
         if (unDistortedImgAstronaut != null) {
             Bitmap bitmapImage = matToBitmap(unDistortedImgAstronaut);
+
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                astronaut_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        astronaut_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(astronaut_item_name.equals(entry.getKey()))
+                    {
                         astronaut_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
             } else {
@@ -750,6 +765,22 @@ public class YourService extends KiboRpcService {
         }
         return resultMap;
     }
+
+    private String getMaxCnfItemname(List<BoundingBox> boundingBoxes)
+    {
+        String max_cnf_item_name = "";
+        float max_cnf = 0;
+
+        for (BoundingBox box : boundingBoxes) {
+            if(max_cnf < box.getCnf())
+            {
+                max_cnf = box.getCnf();
+                max_cnf_item_name = box.getClsName();
+            }
+        }
+        return max_cnf_item_name;
+    }
+
 
 
 }
