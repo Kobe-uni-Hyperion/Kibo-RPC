@@ -49,7 +49,8 @@ public class YourService extends KiboRpcService {
                        + Math.pow(point1[1] - point2[1], 2)
                        + Math.pow(point1[2] - point2[2], 2));
     }
-    private Detector detector;
+    private Detector detector_white;
+    private Detector detector_back;
 
     @Override
     protected void runPlan1() {
@@ -70,8 +71,16 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector = new Detector(getApplicationContext(), "white.tflite", "labels.txt");
-            detector.setup();
+            detector_white = new Detector(getApplicationContext(), "white.tflite", "labels.txt");
+            detector_white.setup();
+        } catch (IOException e) {
+            Log.e(TAG, "Detector setup failed", e);
+            return;
+        }
+
+        try {
+            detector_back = new Detector(getApplicationContext(), "model_v3.tflite", "labels.txt");
+            detector_back.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
             return;
@@ -185,24 +194,46 @@ public class YourService extends KiboRpcService {
 
         if (clippedImg != null) {
             Bitmap bitmapImage = matToBitmap(clippedImg);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+
+            List<BoundingBox> boundingBoxes = detector_white.detect(bitmapImage);
+            api.saveBitmapImage(detector_white.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area1_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area1_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area1_item_name.equals(entry.getKey()))
+                    {
                         area1_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
                     }
                 }
             } else {
                 Log.i(TAG, "No objects detected");
             }
         } else {
-            Log.e(TAG, "Failed to load image from assets");
+            Bitmap bitmapImage = matToBitmap(unDistortedImg);
+
+            List<BoundingBox> boundingBoxes = detector_back.detect(bitmapImage);
+            api.saveBitmapImage(detector_back.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
+
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area1_item_name = getMaxCnfItemname(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area1_item_name.equals(entry.getKey()))
+                    {
+                        area1_item_num = entry.getValue();
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
         }
+
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
         api.setAreaInfo(1,area1_item_name,area1_item_num);
@@ -297,24 +328,46 @@ public class YourService extends KiboRpcService {
 
         if (clippedImg2 != null) {
             Bitmap bitmapImage = matToBitmap(clippedImg2);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+
+            List<BoundingBox> boundingBoxes = detector_white.detect(bitmapImage);
+            api.saveBitmapImage(detector_white.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area2_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area2_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area2_item_name.equals(entry.getKey()))
+                    {
                         area2_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
                     }
                 }
             } else {
                 Log.i(TAG, "No objects detected");
             }
         } else {
-            Log.e(TAG, "Failed to load image from assets");
+            Bitmap bitmapImage = matToBitmap(unDistortedImg2);
+
+            List<BoundingBox> boundingBoxes = detector_back.detect(bitmapImage);
+            api.saveBitmapImage(detector_back.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
+
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area2_item_name = getMaxCnfItemname(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area2_item_name.equals(entry.getKey()))
+                    {
+                        area2_item_num = entry.getValue();
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
         }
+
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
         api.setAreaInfo(2,area2_item_name,area2_item_num);
@@ -388,24 +441,46 @@ public class YourService extends KiboRpcService {
 
         if (clippedImg3 != null) {
             Bitmap bitmapImage = matToBitmap(clippedImg3);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+
+            List<BoundingBox> boundingBoxes = detector_white.detect(bitmapImage);
+            api.saveBitmapImage(detector_white.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area3_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area3_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area3_item_name.equals(entry.getKey()))
+                    {
                         area3_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
                     }
                 }
             } else {
                 Log.i(TAG, "No objects detected");
             }
         } else {
-            Log.e(TAG, "Failed to load image from assets");
+            Bitmap bitmapImage = matToBitmap(unDistortedImg3);
+
+            List<BoundingBox> boundingBoxes = detector_back.detect(bitmapImage);
+            api.saveBitmapImage(detector_back.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
+
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area3_item_name = getMaxCnfItemname(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area3_item_name.equals(entry.getKey()))
+                    {
+                        area3_item_num = entry.getValue();
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
         }
+
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
         api.setAreaInfo(3,area3_item_name,area3_item_num);
@@ -504,23 +579,44 @@ public class YourService extends KiboRpcService {
 
         if (clippedImg4 != null) {
             Bitmap bitmapImage = matToBitmap(clippedImg4);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+
+            List<BoundingBox> boundingBoxes = detector_white.detect(bitmapImage);
+            api.saveBitmapImage(detector_white.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area4_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area4_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area4_item_name.equals(entry.getKey()))
+                    {
                         area4_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
                     }
                 }
             } else {
                 Log.i(TAG, "No objects detected");
             }
         } else {
-            Log.e(TAG, "Failed to load image from assets");
+            Bitmap bitmapImage = matToBitmap(unDistortedImg4);
+
+            List<BoundingBox> boundingBoxes = detector_back.detect(bitmapImage);
+            api.saveBitmapImage(detector_back.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
+
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                area4_item_name = getMaxCnfItemname(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(area4_item_name.equals(entry.getKey()))
+                    {
+                        area4_item_num = entry.getValue();
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
         }
         // AreaとItemの紐付け
         // setAreaInfo(areaId,item_name,item_number)
@@ -609,24 +705,46 @@ public class YourService extends KiboRpcService {
 
         if (clippedImgAstronaut != null) {
             Bitmap bitmapImage = matToBitmap(clippedImgAstronaut);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+
+            List<BoundingBox> boundingBoxes = detector_white.detect(bitmapImage);
+            api.saveBitmapImage(detector_white.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
+
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
                 Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                astronaut_item_name = getMaxCnfItemname(boundingBoxes);
                 for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        astronaut_item_name = entry.getKey();
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(astronaut_item_name.equals(entry.getKey()))
+                    {
                         astronaut_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
             } else {
                 Log.i(TAG, "No objects detected");
             }
         } else {
-            Log.e(TAG, "Failed to load image from assets");
+            Bitmap bitmapImage = matToBitmap(unDistortedImgAstronaut);
+
+            List<BoundingBox> boundingBoxes = detector_back.detect(bitmapImage);
+            api.saveBitmapImage(detector_back.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
+
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                astronaut_item_name = getMaxCnfItemname(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                    if(astronaut_item_name.equals(entry.getKey()))
+                    {
+                        astronaut_item_num = entry.getValue();
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
         }
+
 
         if (astronaut_item_name.equals(area1_item_name)) {
             targetItemID = 1;
@@ -879,6 +997,22 @@ public class YourService extends KiboRpcService {
         }
         return resultMap;
     }
+
+    private String getMaxCnfItemname(List<BoundingBox> boundingBoxes)
+    {
+        String max_cnf_item_name = "";
+        float max_cnf = 0;
+
+        for (BoundingBox box : boundingBoxes) {
+            if(max_cnf < box.getCnf())
+            {
+                max_cnf = box.getCnf();
+                max_cnf_item_name = box.getClsName();
+            }
+        }
+        return max_cnf_item_name;
+    }
+
 
 
 }

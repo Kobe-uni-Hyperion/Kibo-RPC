@@ -51,7 +51,7 @@ public final class Detector {
     private static final float INPUT_STANDARD_DEVIATION = 255.0F;
     private static final DataType INPUT_IMAGE_TYPE = DataType.FLOAT32;
     private static final DataType OUTPUT_IMAGE_TYPE = DataType.FLOAT32;
-    private static final float CONFIDENCE_THRESHOLD = 0.50F;
+    private static final float CONFIDENCE_THRESHOLD = 0.80F;
     private static final float IOU_THRESHOLD = 0.4F;
 
     // コンストラクタ
