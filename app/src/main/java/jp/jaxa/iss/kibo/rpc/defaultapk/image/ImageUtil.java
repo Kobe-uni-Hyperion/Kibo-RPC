@@ -49,7 +49,7 @@ public class ImageUtil {
             transformMatrix = Imgproc.getPerspectiveTransform(srcPoints, dstPoints);
         }
 
-        Mat clippedImage = Mat.zeros((int) width, (int) height, image.type());
+        Mat clippedImage = Mat.zeros((int) height, (int) width, image.type());
         Imgproc.warpPerspective(image, clippedImage, transformMatrix, clippedImage.size());
 
         return clippedImage;
