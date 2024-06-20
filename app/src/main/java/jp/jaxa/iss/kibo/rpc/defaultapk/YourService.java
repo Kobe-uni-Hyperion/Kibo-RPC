@@ -128,7 +128,7 @@ public class YourService extends KiboRpcService {
         int loopCounterFlashLight = 0;
         while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
             // retry
-            resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+            resultFlashLightOn = api.flashlightControlFront((float) 0.3);
             ++loopCounterFlashLight;
         }
 
