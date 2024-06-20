@@ -330,7 +330,6 @@ public class YourService extends KiboRpcService {
          * KOZ2を通過し、Area3に移動する
          */
         // Area3の(0.699 + 0.1177)m手前
-        Point pointInFrontOfArea2 = new Point((10.925 - 0.0422), (-8.875 + 0.0826), (3.76203 + 0.646 + 0.1177));
         Point pointInFrontOfArea3 = new Point((10.925 - 0.0422), (-7.925 + 0.0826), (3.76203 + 0.699 + 0.1177));
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
