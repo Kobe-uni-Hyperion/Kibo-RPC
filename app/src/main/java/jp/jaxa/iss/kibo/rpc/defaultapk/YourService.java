@@ -70,7 +70,7 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector = new Detector(getApplicationContext(), "model.tflite", "labels.txt");
+            detector = new Detector(getApplicationContext(), "white.tflite", "labels.txt");
             detector.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
