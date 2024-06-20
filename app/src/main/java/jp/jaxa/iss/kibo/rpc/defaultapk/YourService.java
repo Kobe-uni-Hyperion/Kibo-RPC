@@ -137,8 +137,8 @@ public class YourService extends KiboRpcService {
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        // Area1の52.5cm手前に移動する
-        Point area1FirstViewPoint = new Point(10.95, -10.055, 5.195);
+        // Area1の60cm手前に移動する
+        Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -224,9 +224,12 @@ public class YourService extends KiboRpcService {
          * KOZ1の前まで行く
          */
         Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
-        // y軸正方向を軸として、-90度回転
-        // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        // y軸正方向を軸として、90度回転
+        // z軸正方向を軸として、90度回転
+        // 視野: z軸負方向へ変わる、90度曲がって見える（はず）
+        Quaternion quaternionArea2Y = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Quaternion quaternionArea2Z = QuaternionUtil.rotate(0, 0, 1, (float) (0.5 * Math.PI));
+        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.product(quaternionArea2Y, quaternionArea2Z);
         Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternionInFrontOfArea2, true);
 
         int loopCounter1KOZ1 = 0;
@@ -328,7 +331,7 @@ public class YourService extends KiboRpcService {
         Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.46);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
-        Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
+        Quaternion quaternionInFrontOfArea3 = quaternionInFrontOfArea2;
         Result resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
 
         int loopCounterArea3 = 0;
@@ -406,6 +409,20 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ3の前まで行く
          */
+
+
+        // Flash Front light off
+        api.flashlightControlFront(0);
+
+         // Flash light on
+        Result resultBackFlashLightOn = api.flashlightControlBack((float) 0.3);
+        int loopCounterBackFlashLight = 0;
+        while (!resultBackFlashLightOn.hasSucceeded() && loopCounterBackFlashLight < 5) {
+            // retry
+            resultBackFlashLightOn = api.flashlightControlBack((float) 0.3);
+            ++loopCounterBackFlashLight;
+        }
+
         Point point1ToGoThroughKOZ3 = new Point(10.64, -7.375, 4.71);
         // x軸正方向を軸として、90度回転
         // Dockカメラで撮る！！
@@ -502,8 +519,8 @@ public class YourService extends KiboRpcService {
          * 宇宙飛行士の前へ移動して画像認識するコード
          */
 
-        // Flash light off
-        api.flashlightControlFront(0);
+        // Flash Back light off
+        api.flashlightControlBack(0);
 
         Point pointInFrontOfAstronaut = new Point(11.143, -6.7607, 4.9654);
         // z軸正方向を軸として、90度回転
