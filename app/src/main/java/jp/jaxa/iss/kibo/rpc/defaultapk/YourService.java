@@ -72,7 +72,7 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector = new Detector(getApplicationContext(), "model_v2.tflite", "labels.txt");
+            detector = new Detector(getApplicationContext(), "model_v3.tflite", "labels.txt");
             detector.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
@@ -137,8 +137,8 @@ public class YourService extends KiboRpcService {
         // とりあえず、Area1の中心から法線ベクトル上にある点に移動する
         // x座標とz座標はArea1の中心から法線ベクトル上にある点
         // y座標をArea1に近づける
-        // Area1の52.5cm手前に移動する
-        Point area1FirstViewPoint = new Point(10.95, -10.055, 5.195);
+        // Area1の60cm手前に移動する
+        Point area1FirstViewPoint = new Point(10.95, -9.98, 5.195);
         Result resultMoveToArea1 = api.moveTo(area1FirstViewPoint, quaternion1, true);
 
         final int LOOP_MAX = 5;
@@ -159,32 +159,6 @@ public class YourService extends KiboRpcService {
         // TODO imageがnullの場合の対処を書く
 
         api.saveMatImage(image, "area1.png");
-
-        String area1_item_name = "beaker";
-        int area1_item_num = 3;
-
-        if (image != null) {
-            Bitmap bitmapImage = matToBitmap(image);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
-            if (boundingBoxes != null) {
-                // 検出結果の名前と個数を表示
-                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
-                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area1_item_name = entry.getKey();
-                        area1_item_num = entry.getValue();
-                    }
-                }
-             } else {
-                Log.i(TAG, "No objects detected");
-             }
-        } else {
-            Log.e(TAG, "Failed to load image from assets");
-        }
-        // AreaとItemの紐付け
-        // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(1,area1_item_name,area1_item_num);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -210,6 +184,33 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
+        String area1_item_name = "beaker";
+        int area1_item_num = 3;
+
+        if (unDistortedImg != null) {
+            Bitmap bitmapImage = matToBitmap(unDistortedImg);
+            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    if(entry.getValue()>0){
+                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                        area1_item_name = entry.getKey();
+                        area1_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area1_boxes.png");
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
+        } else {
+            Log.e(TAG, "Failed to load image from assets");
+        }
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(1,area1_item_name,area1_item_num);
+
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
@@ -223,6 +224,7 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1の前まで行く
          */
+        // Area2(KIZ1)の5cm手前
         Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
         // y軸正方向を軸として、-90度回転
         // 視野: z軸負方向へ変わる
@@ -241,8 +243,7 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        // Area2の65cm手前
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.41);
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -259,32 +260,6 @@ public class YourService extends KiboRpcService {
         // TODO image2がnullの場合の対処を書く
 
         api.saveMatImage(image2, "area2.png");
-
-        String area2_item_name = "beaker";
-        int area2_item_num = 3;
-
-        if (image2 != null) {
-            Bitmap bitmapImage = matToBitmap(image2);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
-            if (boundingBoxes != null) {
-                // 検出結果の名前と個数を表示
-                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
-                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area2_item_name = entry.getKey();
-                        area2_item_num = entry.getValue();
-                    }
-                }
-            } else {
-                Log.i(TAG, "No objects detected");
-            }
-        } else {
-            Log.e(TAG, "Failed to load image from assets");
-        }
-        // AreaとItemの紐付け
-        // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(2,area2_item_name,area2_item_num);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -313,6 +288,32 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
+        String area2_item_name = "beaker";
+        int area2_item_num = 3;
+
+        if (unDistortedImg2 != null) {
+            Bitmap bitmapImage = matToBitmap(unDistortedImg2);
+            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    if(entry.getValue()>0){
+                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                        area2_item_name = entry.getKey();
+                        area2_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area2_boxes.png");
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
+        } else {
+            Log.e(TAG, "Failed to load image from assets");
+        }
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(2,area2_item_name,area2_item_num);
 
         /**
          * point3に移動して画像認識するコード
@@ -324,8 +325,8 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ2を通過し、Area3に移動する
          */
-        // Area3(KIZ1)の70cm手前
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.46);
+        // Area3(KIZ1)の5cm手前
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea3 = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
@@ -345,32 +346,6 @@ public class YourService extends KiboRpcService {
         // TODO image3がnullの場合の対処を書く
 
         api.saveMatImage(image3, "area3.png");
-
-        String area3_item_name = "beaker";
-        int area3_item_num = 3;
-
-        if (image3 != null) {
-            Bitmap bitmapImage = matToBitmap(image3);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
-            if (boundingBoxes != null) {
-                // 検出結果の名前と個数を表示
-                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
-                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area3_item_name = entry.getKey();
-                        area3_item_num = entry.getValue();
-                    }
-                }
-            } else {
-                Log.i(TAG, "No objects detected");
-            }
-        } else {
-            Log.e(TAG, "Failed to load image from assets");
-        }
-        // AreaとItemの紐付け
-        // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(3,area3_item_name,area3_item_num);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -399,6 +374,32 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
+        String area3_item_name = "beaker";
+        int area3_item_num = 3;
+
+        if (unDistortedImg3 != null) {
+            Bitmap bitmapImage = matToBitmap(unDistortedImg3);
+            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    if(entry.getValue()>0){
+                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                        area3_item_name = entry.getKey();
+                        area3_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area3_boxes.png");
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
+        } else {
+            Log.e(TAG, "Failed to load image from assets");
+        }
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(3,area3_item_name,area3_item_num);
 
         /**
          * point4に移動して画像認識するコード
@@ -407,9 +408,9 @@ public class YourService extends KiboRpcService {
          * KOZ3の前まで行く
          */
         Point point1ToGoThroughKOZ3 = new Point(10.64, -7.375, 4.71);
-        // x軸正方向を軸として、90度回転
-        // Dockカメラで撮る！！
-        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(1, 0, 0, (float) ((1/2) * Math.PI));
+        // z軸正方向を軸として、180度回転
+        // 視野: x軸負方向へ変わる
+        Quaternion quaternionInFrontOfArea4 = QuaternionUtil.rotate(0, 0, 1, (float) (Math.PI));
         Result result1MoveToKOZ3 = api.moveTo(point1ToGoThroughKOZ3, quaternionInFrontOfArea4, true);
 
         int loopCounter1KOZ3 = 0;
@@ -424,8 +425,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の70cm手前
-        Point pointInFrontOfArea4 = new Point(10.566984, -6.9875, 4.945);
+        // Area4の60cm手前
+        Point pointInFrontOfArea4 = new Point(10.46, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -437,38 +438,11 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea4!!!!");
 
-        Mat image4 = api.getMatDockCam();
+        Mat image4 = api.getMatNavCam();
 
         // TODO image4がnullの場合の対処を書く
 
         api.saveMatImage(image4, "area4.png");
-
-
-        String area4_item_name = "beaker";
-        int area4_item_num = 3;
-
-        if (image4 != null) {
-            Bitmap bitmapImage = matToBitmap(image4);
-            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
-            if (boundingBoxes != null) {
-                // 検出結果の名前と個数を表示
-                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
-                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
-                    if(entry.getValue()>0){
-                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
-                        area4_item_name = entry.getKey();
-                        area4_item_num = entry.getValue();
-                    }
-                }
-            } else {
-                Log.i(TAG, "No objects detected");
-            }
-        } else {
-            Log.e(TAG, "Failed to load image from assets");
-        }
-        // AreaとItemの紐付け
-        // setAreaInfo(areaId,item_name,item_number)
-        api.setAreaInfo(4,area4_item_name,area4_item_num);
 
         /* *********************************************************************** */
         /* 各エリアにあるアイテムの種類と数を認識するコード */
@@ -493,6 +467,33 @@ public class YourService extends KiboRpcService {
         Calib3d.undistort(image4, unDistortedImg4, cameraMatrix4, cameraCoefficients4);
 
         api.saveMatImage(unDistortedImg4, "unDistortedImgOfArea4.png");
+
+        String area4_item_name = "beaker";
+        int area4_item_num = 3;
+
+        if (unDistortedImg4 != null) {
+            Bitmap bitmapImage = matToBitmap(unDistortedImg4);
+            List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
+            if (boundingBoxes != null) {
+                // 検出結果の名前と個数を表示
+                Map<String, Integer> detectionResults = processDetectionResult(boundingBoxes);
+                for (Map.Entry<String, Integer> entry : detectionResults.entrySet()) {
+                    if(entry.getValue()>0){
+                        Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
+                        area4_item_name = entry.getKey();
+                        area4_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area4_boxes.png");
+                    }
+                }
+            } else {
+                Log.i(TAG, "No objects detected");
+            }
+        } else {
+            Log.e(TAG, "Failed to load image from assets");
+        }
+        // AreaとItemの紐付け
+        // setAreaInfo(areaId,item_name,item_number)
+        api.setAreaInfo(4,area4_item_name,area4_item_num);
 
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
@@ -563,13 +564,15 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        int targetItemID = 1;
+        int targetItemID;
+        targetItemID = 1;
+
 
         String astronaut_item_name = "beaker";
         int astronaut_item_num = 3;
 
-        if (imageAstronaut != null) {
-            Bitmap bitmapImage = matToBitmap(imageAstronaut);
+        if (unDistortedImgAstronaut != null) {
+            Bitmap bitmapImage = matToBitmap(unDistortedImgAstronaut);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
@@ -579,6 +582,7 @@ public class YourService extends KiboRpcService {
                         Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
                         astronaut_item_name = entry.getKey();
                         astronaut_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
             } else {
@@ -622,7 +626,7 @@ public class YourService extends KiboRpcService {
          * astronaut is looking for)
          */
 
-        if (targetItemID == 1){
+
         /**
          * KOZ3の前まで行く
          */
@@ -684,53 +688,6 @@ public class YourService extends KiboRpcService {
         }
 
         Log.i(TAG, "InFrontOfArea1WhenReturn!!!!");
-    } else if (targetItemID == 2){
-        /**
-         * KOZ3の前まで行く
-         */
-        // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ3WhenReturn = new Point(11.1, -7.375, 5.22);
-        Result result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
-
-        int loopCounter1KOZ3WhenReturn = 0;
-        while (!result1MoveToKOZ3WhenReturn.hasSucceeded() && loopCounter1KOZ3WhenReturn < 5) {
-            // retry
-            result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternion1, true);
-            ++loopCounter1KOZ3WhenReturn;
-        }
-
-        Log.i(TAG, "InFrontOfKOZ3WhenReturn!!!!");
-
-        /**
-         * KOZ2の前まで行く
-         */
-        // 得られた最短距離の座標に移動
-        Point point1ToGoThroughKOZ2WhenReturn = new Point(10.9, -8.475, 4.72);
-        Result result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
-
-        int loopCounter1KOZ2WhenReturn = 0;
-        while (!result1MoveToKOZ2WhenReturn.hasSucceeded() && loopCounter1KOZ2WhenReturn < 5) {
-            // retry
-            result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
-            ++loopCounter1KOZ2WhenReturn;
-        }
-
-        Log.i(TAG, "InFrontOfKOZ2WhenReturn!!!!");
-
-        /**
-         * Area2に移動する
-         */
-        resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
-
-        int loopCounterArea2WhenReturn = 0;
-        while (!resultMoveToArea2.hasSucceeded() && loopCounterArea2WhenReturn < 5) {
-            // retry
-            resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
-            ++loopCounterArea2WhenReturn;
-        }
-
-        Log.i(TAG, "InFrontOfArea2WhenReturn!!!!");
-    }
 
         Mat imageAfterReturn = api.getMatNavCam();
         api.saveMatImage(imageAfterReturn, "afterReturn.png");

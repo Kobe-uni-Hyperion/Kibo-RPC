@@ -2,6 +2,9 @@ package jp.jaxa.iss.kibo.rpc.defaultapk;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Color;
 
 import org.tensorflow.lite.DataType;
 import org.tensorflow.lite.Interpreter;
@@ -45,7 +48,7 @@ public final class Detector {
     private static final float INPUT_STANDARD_DEVIATION = 255.0F;
     private static final DataType INPUT_IMAGE_TYPE = DataType.FLOAT32;
     private static final DataType OUTPUT_IMAGE_TYPE = DataType.FLOAT32;
-    private static final float CONFIDENCE_THRESHOLD = 0.40F;
+    private static final float CONFIDENCE_THRESHOLD = 0.50F;
     private static final float IOU_THRESHOLD = 0.4F;
 
     // コンストラクタ
@@ -186,4 +189,37 @@ public final class Detector {
         float box2Area = box2.getW() * box2.getH();
         return intersectionArea / (box1Area + box2Area - intersectionArea);
     }
+
+    public Bitmap drawBoundingBoxesOnBitmap(Bitmap bitmap, List<BoundingBox> boundingBoxes) {
+        if (bitmap == null || boundingBoxes == null) {
+            return null;
+        }
+
+        Bitmap resultBitmap = bitmap.copy(bitmap.getConfig(), true);
+        Canvas canvas = new Canvas(resultBitmap);
+        Paint boxPaint = new Paint();
+        boxPaint.setStyle(Paint.Style.STROKE);
+        boxPaint.setColor(Color.RED);
+        boxPaint.setStrokeWidth(5);
+
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.RED);
+        textPaint.setTextSize(24);
+
+        for (BoundingBox box : boundingBoxes) {
+            float x1 = box.getX1() * bitmap.getWidth();
+            float y1 = box.getY1() * bitmap.getHeight();
+            float x2 = box.getX2() * bitmap.getWidth();
+            float y2 = box.getY2() * bitmap.getHeight();
+
+            canvas.drawRect(x1, y1, x2, y2, boxPaint);
+
+            String text = box.getClsName() + ": " + String.format("%.2f", box.getCnf());
+            canvas.drawText(text, x1, y1 - 10, textPaint);
+        }
+
+        return resultBitmap;
+    }
+
+
 }
