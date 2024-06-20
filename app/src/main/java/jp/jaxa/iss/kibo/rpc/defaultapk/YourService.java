@@ -637,7 +637,7 @@ public class YourService extends KiboRpcService {
         } else if (astronaut_item_name.equals(area4_item_name)) {
             targetItemID = 4;
         } else {
-            targetItemID = 1;
+            targetItemID = 4;
         }
 
         Log.i(TAG, "InFrontOfAstronaut!!!!");
