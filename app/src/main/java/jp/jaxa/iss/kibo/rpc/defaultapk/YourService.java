@@ -583,7 +583,6 @@ public class YourService extends KiboRpcService {
                         astronaut_item_name = entry.getKey();
                         astronaut_item_num = entry.getValue();
                         api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
             } else {
