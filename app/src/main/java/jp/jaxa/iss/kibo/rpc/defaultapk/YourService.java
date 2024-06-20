@@ -230,7 +230,6 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1の前まで行く
          */
-        // Area2(KIZ1)の5cm手前
         Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
         // y軸正方向を軸として、90度回転
         // z軸正方向を軸として、90度回転
@@ -252,7 +251,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
+        // Area2の70cm手前
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.46);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -339,8 +339,8 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ2を通過し、Area3に移動する
          */
-        // Area3(KIZ1)の5cm手前
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
+        // Area3の75cm手前
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.51);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea3 = quaternionInFrontOfArea2;
@@ -458,8 +458,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の80cm手前
-        Point pointInFrontOfArea4 = new Point(10.66, -6.9875, 4.945);
+        // Area4の75cm手前
+        Point pointInFrontOfArea4 = new Point(10.61, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
