@@ -197,7 +197,7 @@ public class YourService extends KiboRpcService {
             }
         }
 
-        Mat clippedImage = Mat.zeros((int) width, (int) height, unDistortedImg.type());
+        Mat clippedImage = Mat.zeros((int) height, (int) width, unDistortedImg.type());
 
         Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
         api.saveMatImage(clippedImage, "clippedImage.png");
