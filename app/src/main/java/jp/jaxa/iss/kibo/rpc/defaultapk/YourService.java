@@ -438,7 +438,7 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea4!!!!");
 
-        Mat image4 = api.getMatNavCam();
+        Mat image4 = api.getMatDockCam();
 
         // TODO image4がnullの場合の対処を書く
 
