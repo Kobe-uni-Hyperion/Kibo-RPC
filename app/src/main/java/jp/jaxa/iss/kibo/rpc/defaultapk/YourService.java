@@ -72,7 +72,7 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector = new Detector(getApplicationContext(), "model_v2.tflite", "labels.txt");
+            detector = new Detector(getApplicationContext(), "model_v3.tflite", "labels.txt");
             detector.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
@@ -224,6 +224,7 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ1の前まで行く
          */
+        // Area2(KIZ1)の5cm手前
         Point point1ToGoThroughKOZ1 = new Point(10.67, -9.475, 4.77);
         // y軸正方向を軸として、90度回転
         // z軸正方向を軸として、90度回転
@@ -245,8 +246,7 @@ public class YourService extends KiboRpcService {
         /**
          * Area2に移動する
          */
-        // Area2の65cm手前
-        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.41);
+        Point pointInFrontOfArea2 = new Point(10.925, -8.875, 4.37);
         Result resultMoveToArea2 = api.moveTo(pointInFrontOfArea2, quaternionInFrontOfArea2, true);
 
         int loopCounterArea2 = 0;
@@ -328,8 +328,8 @@ public class YourService extends KiboRpcService {
         /**
          * KOZ2を通過し、Area3に移動する
          */
-        // Area3(KIZ1)の70cm手前
-        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.46);
+        // Area3(KIZ1)の5cm手前
+        Point pointInFrontOfArea3 = new Point(10.925, -7.925, 4.37);
         // y軸正方向を軸として、90度回転
         // 視野: z軸負方向へ変わる
         Quaternion quaternionInFrontOfArea3 = quaternionInFrontOfArea2;
@@ -442,8 +442,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の70cm手前
-        Point pointInFrontOfArea4 = new Point(10.566984, -6.9875, 4.945);
+        // Area4の60cm手前
+        Point pointInFrontOfArea4 = new Point(10.46, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -455,7 +455,7 @@ public class YourService extends KiboRpcService {
 
         Log.i(TAG, "InFrontOfArea4!!!!");
 
-        Mat image4 = api.getMatDockCam();
+        Mat image4 = api.getMatNavCam();
 
         // TODO image4がnullの場合の対処を書く
 
@@ -581,7 +581,9 @@ public class YourService extends KiboRpcService {
         // ARタグからカメラまでの距離と傾きを求めて、
         // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
 
-        int targetItemID = 1;
+        int targetItemID;
+        targetItemID = 1;
+
 
         String astronaut_item_name = "beaker";
         int astronaut_item_num = 3;
@@ -597,6 +599,7 @@ public class YourService extends KiboRpcService {
                         Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
                         astronaut_item_name = entry.getKey();
                         astronaut_item_num = entry.getValue();
+                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                         api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
@@ -641,7 +644,9 @@ public class YourService extends KiboRpcService {
          * astronaut is looking for)
          */
 
-        if (targetItemID == 1){
+        if (targetItemID == 1)
+        {
+
         /**
          * KOZ3の前まで行く
          */
