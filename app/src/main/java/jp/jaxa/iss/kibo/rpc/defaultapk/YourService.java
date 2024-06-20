@@ -706,12 +706,12 @@ public class YourService extends KiboRpcService {
          */
         // 得られた最短距離の座標に移動
         Point point1ToGoThroughKOZ2WhenReturn = new Point(10.9, -8.475, 4.72);
-        Result result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+        Result result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternionInFrontOfArea2, true);
 
         int loopCounter1KOZ2WhenReturn = 0;
         while (!result1MoveToKOZ2WhenReturn.hasSucceeded() && loopCounter1KOZ2WhenReturn < 5) {
             // retry
-            result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternion1, true);
+            result1MoveToKOZ2WhenReturn = api.moveTo(point1ToGoThroughKOZ2WhenReturn, quaternionInFrontOfArea2, true);
             ++loopCounter1KOZ2WhenReturn;
         }
 
@@ -730,6 +730,50 @@ public class YourService extends KiboRpcService {
         }
 
         Log.i(TAG, "InFrontOfArea2WhenReturn!!!!");
+    } else if (targetItemID == 3){
+        /**
+         * KOZ3の前まで行く
+         */
+        // 得られた最短距離の座標に移動
+        Point point1ToGoThroughKOZ3WhenReturn = new Point(10.65, -7.375, 4.67);
+        Result result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternionInFrontOfArea3, true);
+
+        int loopCounter1KOZ3WhenReturn = 0;
+        while (!result1MoveToKOZ3WhenReturn.hasSucceeded() && loopCounter1KOZ3WhenReturn < 5) {
+            // retry
+            result1MoveToKOZ3WhenReturn = api.moveTo(point1ToGoThroughKOZ3WhenReturn, quaternionInFrontOfArea3, true);
+            ++loopCounter1KOZ3WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfKOZ3WhenReturn!!!!");
+
+        /**
+         * Area3に移動する
+         */
+        resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
+
+        int loopCounterArea3WhenReturn = 0;
+        while (!resultMoveToArea3.hasSucceeded() && loopCounterArea3WhenReturn < 5) {
+            // retry
+            resultMoveToArea3 = api.moveTo(pointInFrontOfArea3, quaternionInFrontOfArea3, true);
+            ++loopCounterArea3WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfArea3WhenReturn!!!!");
+    } else if (targetItemID == 4){
+        /**
+         * Area4に移動する
+         */
+        resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
+
+        int loopCounterArea4WhenReturn = 0;
+        while (!resultMoveToArea4.hasSucceeded() && loopCounterArea4WhenReturn < 5) {
+            // retry
+            resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
+            ++loopCounterArea4WhenReturn;
+        }
+
+        Log.i(TAG, "InFrontOfArea4WhenReturn!!!!");
     }
 
         Mat imageAfterReturn = api.getMatNavCam();
