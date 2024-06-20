@@ -231,7 +231,7 @@ public class YourService extends KiboRpcService {
         // 視野: z軸負方向へ変わる、90度曲がって見える（はず）
         Quaternion quaternionArea2Y = QuaternionUtil.rotate(0, 1, 0, (float) (0.5 * Math.PI));
         Quaternion quaternionArea2Z = QuaternionUtil.rotate(0, 0, 1, (float) (0.5 * Math.PI));
-        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.product(quaternionArea2Y, quaternionArea2Z);
+        Quaternion quaternionInFrontOfArea2 = QuaternionUtil.product(quaternionArea2Z, quaternionArea2Y);
         Result result1MoveToKOZ1 = api.moveTo(point1ToGoThroughKOZ1, quaternionInFrontOfArea2, true);
 
         int loopCounter1KOZ1 = 0;
@@ -442,8 +442,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の60cm手前
-        Point pointInFrontOfArea4 = new Point(10.46, -6.9875, 4.945);
+        // Area4の70cm手前
+        Point pointInFrontOfArea4 = new Point(10.56, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
@@ -599,7 +599,6 @@ public class YourService extends KiboRpcService {
                         Log.i(TAG, "Detected object: " + entry.getKey() + " with count: " + entry.getValue());
                         astronaut_item_name = entry.getKey();
                         astronaut_item_num = entry.getValue();
-                        api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                         api.saveBitmapImage(detector.drawBoundingBoxesOnBitmap(bitmapImage,boundingBoxes),"area5_boxes.png");
                     }
                 }
