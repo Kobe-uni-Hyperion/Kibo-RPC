@@ -197,6 +197,7 @@ public class YourService extends KiboRpcService {
             }
         }
 
+        // 引数をrow,columnの順にする必要があるためheight, widthの順に変更
         Mat clippedImage = Mat.zeros((int) height, (int) width, unDistortedImg.type());
 
         Imgproc.warpPerspective(unDistortedImg, clippedImage, transformMatrix, clippedImage.size());
