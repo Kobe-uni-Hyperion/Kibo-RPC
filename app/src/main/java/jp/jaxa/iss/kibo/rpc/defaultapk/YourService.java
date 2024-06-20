@@ -124,7 +124,7 @@ public class YourService extends KiboRpcService {
         Log.i(TAG, "GetIntoKIZ1!!!!");
 
         // Flash light on
-        Result resultFlashLightOn = api.flashlightControlFront((float) 0.4);
+        Result resultFlashLightOn = api.flashlightControlFront((float) 0.3);
         int loopCounterFlashLight = 0;
         while (!resultFlashLightOn.hasSucceeded() && loopCounterFlashLight < 5) {
             // retry
