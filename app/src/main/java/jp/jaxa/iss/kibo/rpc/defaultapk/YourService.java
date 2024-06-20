@@ -458,8 +458,8 @@ public class YourService extends KiboRpcService {
         /**
          * Area4に移動する
          */
-        // Area4の70cm手前
-        Point pointInFrontOfArea4 = new Point(10.56, -6.9875, 4.945);
+        // Area4の80cm手前
+        Point pointInFrontOfArea4 = new Point(10.66, -6.9875, 4.945);
         Result resultMoveToArea4 = api.moveTo(pointInFrontOfArea4, quaternionInFrontOfArea4, true);
 
         int loopCounterArea4 = 0;
