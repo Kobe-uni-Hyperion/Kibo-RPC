@@ -1,32 +1,30 @@
 package jp.jaxa.iss.kibo.rpc.defaultapk;
 
-import android.util.Log;
-import gov.nasa.arc.astrobee.Result;
-import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
-import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-
-import gov.nasa.arc.astrobee.types.Point;
-import gov.nasa.arc.astrobee.types.Quaternion;
-import gov.nasa.arc.astrobee.Kinematics;
-
-import org.opencv.aruco.Aruco;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.aruco.Dictionary;
-import org.opencv.calib3d.Calib3d;
-import org.opencv.android.Utils;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import jp.jaxa.iss.kibo.rpc.defaultapk.BoundingBox;
-import jp.jaxa.iss.kibo.rpc.defaultapk.Detector;
+import android.util.Log;
+
+import org.opencv.android.Utils;
+import org.opencv.aruco.Aruco;
+import org.opencv.aruco.Dictionary;
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import gov.nasa.arc.astrobee.Kinematics;
+import gov.nasa.arc.astrobee.Result;
+import gov.nasa.arc.astrobee.types.Point;
+import gov.nasa.arc.astrobee.types.Quaternion;
+import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
+import jp.jaxa.iss.kibo.rpc.defaultapk.image.ImageUtil;
+import jp.jaxa.iss.kibo.rpc.defaultapk.math.QuaternionUtil;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them
@@ -72,7 +70,7 @@ public class YourService extends KiboRpcService {
 
         // Detectorのセットアップ
         try {
-            detector = new Detector(getApplicationContext(), "model_v3.tflite", "labels.txt");
+            detector = new Detector(getApplicationContext(), "model.tflite", "labels.txt");
             detector.setup();
         } catch (IOException e) {
             Log.e(TAG, "Detector setup failed", e);
@@ -184,11 +182,19 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImg, "unDistortedImgOfArea1.png");
 
+        // 台紙切り抜き
+        Mat clippedImg = ImageUtil.clipAR(unDistortedImg);
+        if (clippedImg != null && !clippedImg.empty()) {
+            api.saveMatImage(clippedImg, "clippedImg.png");
+        } else {
+            Log.i(TAG, "clippedImg = null or empty");
+        }
+
         String area1_item_name = "beaker";
         int area1_item_num = 3;
 
-        if (unDistortedImg != null) {
-            Bitmap bitmapImage = matToBitmap(unDistortedImg);
+        if (clippedImg != null) {
+            Bitmap bitmapImage = matToBitmap(clippedImg);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
@@ -285,14 +291,19 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImg2, "unDistortedImgOfArea2.png");
 
-        // ARタグからカメラまでの距離と傾きを求めて、
-        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+        // 台紙切り抜き
+        Mat clippedImg2 = ImageUtil.clipAR(unDistortedImg2);
+        if (clippedImg2 != null && !clippedImg2.empty()) {
+            api.saveMatImage(clippedImg2, "clippedImg2.png");
+        } else {
+            Log.i(TAG, "clippedImg2 = null or empty");
+        }
 
         String area2_item_name = "beaker";
         int area2_item_num = 3;
 
-        if (unDistortedImg2 != null) {
-            Bitmap bitmapImage = matToBitmap(unDistortedImg2);
+        if (clippedImg2 != null) {
+            Bitmap bitmapImage = matToBitmap(clippedImg2);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
@@ -371,14 +382,19 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImg3, "unDistortedImgOfArea3.png");
 
-        // ARタグからカメラまでの距離と傾きを求めて、
-        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+        // 台紙切り抜き
+        Mat clippedImg3 = ImageUtil.clipAR(unDistortedImg3);
+        if (clippedImg3 != null && !clippedImg3.empty()) {
+            api.saveMatImage(clippedImg3, "clippedImg3.png");
+        } else {
+            Log.i(TAG, "clippedImg3 = null or empty");
+        }
 
         String area3_item_name = "beaker";
         int area3_item_num = 3;
 
-        if (unDistortedImg3 != null) {
-            Bitmap bitmapImage = matToBitmap(unDistortedImg3);
+        if (clippedImg3 != null) {
+            Bitmap bitmapImage = matToBitmap(clippedImg3);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
@@ -468,11 +484,19 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImg4, "unDistortedImgOfArea4.png");
 
+        // 台紙切り抜き
+        Mat clippedImg4 = ImageUtil.clipAR(unDistortedImg4);
+        if (clippedImg4 != null && !clippedImg4.empty()) {
+            api.saveMatImage(clippedImg4, "clippedImg4.png");
+        } else {
+            Log.i(TAG, "clippedImg4 = null or empty");
+        }
+
         String area4_item_name = "beaker";
         int area4_item_num = 3;
 
-        if (unDistortedImg4 != null) {
-            Bitmap bitmapImage = matToBitmap(unDistortedImg4);
+        if (clippedImg4 != null) {
+            Bitmap bitmapImage = matToBitmap(clippedImg4);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
@@ -561,8 +585,13 @@ public class YourService extends KiboRpcService {
 
         api.saveMatImage(unDistortedImgAstronaut, "unDistortedImgOfAreaAstronaut.png");
 
-        // ARタグからカメラまでの距離と傾きを求めて、
-        // 撮影した画像での座標に変換して画像用紙の部分だけを切り抜く
+        // 台紙切り抜き
+        Mat clippedImgAstronaut = ImageUtil.clipAR(unDistortedImgAstronaut);
+        if (clippedImgAstronaut != null && !clippedImgAstronaut.empty()) {
+            api.saveMatImage(clippedImgAstronaut, "clippedImgAstronaut.png");
+        } else {
+            Log.i(TAG, "clippedImgAstronaut = null or empty");
+        }
 
         int targetItemID;
         targetItemID = 1;
@@ -571,8 +600,8 @@ public class YourService extends KiboRpcService {
         String astronaut_item_name = "beaker";
         int astronaut_item_num = 3;
 
-        if (unDistortedImgAstronaut != null) {
-            Bitmap bitmapImage = matToBitmap(unDistortedImgAstronaut);
+        if (clippedImgAstronaut != null) {
+            Bitmap bitmapImage = matToBitmap(clippedImgAstronaut);
             List<BoundingBox> boundingBoxes = detector.detect(bitmapImage);
             if (boundingBoxes != null) {
                 // 検出結果の名前と個数を表示
